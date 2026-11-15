@@ -147,7 +147,7 @@ function Root() {
             ref={web}
             source={{ uri: START_URL }}
             style={s.web}
-            originWhitelist={['http://127.0.0.1:4100']}
+            originWhitelist={['http://127.0.0.1:4100', 'intent://*']}
             javaScriptEnabled
             domStorageEnabled
             mediaPlaybackRequiresUserAction={false}
