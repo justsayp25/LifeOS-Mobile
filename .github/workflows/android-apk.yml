@@ -40,7 +40,7 @@ jobs:
       - name: Generate the Android project (expo prebuild)
         run: npx expo prebuild --platform android --no-install
 
-      - name: Build the APK (arm64, signed with the debug key: for installing on your own phone)
+      - name: Build the APK (arm64, debug-signed, for installing on your own phone)
         working-directory: android
         run: |
           chmod +x gradlew
