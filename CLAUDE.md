@@ -36,6 +36,7 @@ Everything: the WebView against the Termux server, the Termux start intent (need
 
 ## Direction from v1.3 (current; replaces the "native app" notes of v1.2)
 Main screen = one WebView on `http://127.0.0.1:4100/?view=phone`. Opening the app shows "Starting R.E.N.E.E.", asks Termux (RUN_COMMAND) to run `~/lifeos-start.sh` (starts the LifeOS-Desktop server inside proot Ubuntu), polls `/api/health` for up to 30 s, then loads the WebView. On failure: message, Retry, Open Termux, Setup.
+- The server never stops by itself (IDLE_MIN = 0); the idle stop exists in LifeOS-Desktop but is off.
 - Sync button (menu) = `POST /api/gitsync/run` on the server: phone vault copy <-> GitHub <-> PC. Never overwrites or deletes: conflicts keep both copies, a note deleted on the phone goes to `1 Human/99 Bin` (LifeOS-Desktop >= v1.7.1). The GitHub token lives only on the phone (git credential store inside Ubuntu), never in a repo.
 - Kept but NOT the main screen: `src/vault/*` and `src/VaultApp.tsx` (in-app vault in a shared folder with isomorphic-git, tested by `node --experimental-strip-types tools/test-sync.mjs`; the manifest permission MANAGE_EXTERNAL_STORAGE was removed until it is used again) and the Kotlin Termux module (`modules/termux-run`).
 - The APK is a release build signed with the debug key (standalone). A true Gradle debug build needs a Metro dev server and would not open on its own.

@@ -24,8 +24,8 @@ export const C = {
 
 // Seconds to wait for the server after the start intent.
 export const START_WAIT_S = 30;
-// The server stops itself after this many idle minutes (the app sends /api/health every 30 s while it is open).
-export const IDLE_MIN = 10;
+// Minutes of no use before the server stops itself. 0 = it keeps running.
+export const IDLE_MIN = 0; // 0 = never stop by itself (Jess does not want it)
 
 // ---- one-time Termux setup, as copy buttons (Jess's phone: Termux from F-Droid, proot-distro Ubuntu, app in ~/lifeos, vault in ~/vault/LifeOS) ----
 export const CMD_PROPS = [
