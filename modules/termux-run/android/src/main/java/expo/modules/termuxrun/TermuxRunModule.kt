@@ -61,6 +61,18 @@ class TermuxRunModule : Module() {
       true
     }
 
+    // Opens another installed app (Gmail, Drive, Canvas). false = it is not installed, so the caller opens the web page instead.
+    AsyncFunction("openApp") { pkg: String ->
+      val intent = context.packageManager.getLaunchIntentForPackage(pkg)
+      if (intent == null) {
+        false
+      } else {
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
+        true
+      }
+    }
+
     AsyncFunction("open") {
       val intent = context.packageManager.getLaunchIntentForPackage("com.termux")
       if (intent == null) {

@@ -121,6 +121,17 @@ function Root() {
 
   const onNav = (n: WebViewNavigation) => { canGoBack.current = n.canGoBack; };
   const allow = (req: { url: string }) => {
+    // Quick links (Gmail, Drive, Canvas) come as intent:// links: open the installed app, or the web page if it is not installed
+    if (req.url.startsWith('intent:')) {
+      const pkg = (req.url.match(/package=([\w.]+)/) || [])[1];
+      let web = ''; try { web = decodeURIComponent((req.url.match(/S\.browser_fallback_url=([^;]+)/) || [])[1] || ''); } catch { /* none */ }
+      (async () => {
+        let opened = false;
+        if (pkg) { try { opened = await TermuxRun.openApp(pkg); } catch { opened = false; } }
+        if (!opened && web) Linking.openURL(web).catch(() => {});
+      })();
+      return false;
+    }
     if (req.url.startsWith(BASE) || req.url.startsWith('about:') || req.url.startsWith('blob:') || req.url.startsWith('data:')) return true;
     Linking.openURL(req.url).catch(() => {}); // anything outside LifeOS opens in the browser
     return false;
