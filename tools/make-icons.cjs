@@ -31,10 +31,10 @@ function draw(size, { R, ring, dot, bg, disc, rc, dc }) {
   return png(size, size, buf);
 }
 const out = path.join(__dirname, '..', 'assets'); fs.mkdirSync(out, { recursive: true });
-const BG = [30, 30, 30], DISC = [0, 0, 0], RING = [62, 62, 62], DOT = [245, 245, 245];
-fs.writeFileSync(path.join(out, 'icon.png'), draw(1024, { R: 440, ring: 24, dot: 114, bg: BG, disc: DISC, rc: RING, dc: DOT }));
-// Android adaptive icon: the system adds the background colour and crops to a circle/squircle; keep the mark inside the centre 66%
-fs.writeFileSync(path.join(out, 'android-icon-foreground.png'), draw(1024, { R: 330, ring: 20, dot: 86, bg: null, disc: DISC, rc: RING, dc: DOT }));
-fs.writeFileSync(path.join(out, 'android-icon-monochrome.png'), draw(1024, { R: 330, ring: 24, dot: 86, bg: null, disc: null, rc: [255, 255, 255], dc: [255, 255, 255] }));
-fs.writeFileSync(path.join(out, 'splash-icon.png'), draw(512, { R: 200, ring: 12, dot: 52, bg: null, disc: DISC, rc: RING, dc: DOT }));
+// Plain black with a white dot, no outline. The adaptive icon gets its black from app.json (backgroundColor), so its foreground is the dot only.
+const BG = [0, 0, 0], DOT = [245, 245, 245];
+fs.writeFileSync(path.join(out, 'icon.png'), draw(1024, { R: 0, ring: 0, dot: 150, bg: BG, disc: null, rc: null, dc: DOT }));
+fs.writeFileSync(path.join(out, 'android-icon-foreground.png'), draw(1024, { R: 0, ring: 0, dot: 120, bg: null, disc: null, rc: null, dc: DOT }));
+fs.writeFileSync(path.join(out, 'android-icon-monochrome.png'), draw(1024, { R: 0, ring: 0, dot: 120, bg: null, disc: null, rc: null, dc: [255, 255, 255] }));
+fs.writeFileSync(path.join(out, 'splash-icon.png'), draw(512, { R: 0, ring: 0, dot: 60, bg: null, disc: null, rc: null, dc: DOT }));
 console.log('icons written to', out);

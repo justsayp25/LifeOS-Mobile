@@ -1,17 +1,18 @@
 import { StatusBar } from 'expo-status-bar';
 import * as Clipboard from 'expo-clipboard';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, BackHandler, Linking, Modal, PermissionsAndroid, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, AppState, BackHandler, Linking, Modal, PermissionsAndroid, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WebView as RNWebView, type WebViewNavigation } from 'react-native-webview';
 import TermuxRun from './modules/termux-run';
 import { ping, syncVault } from './src/api';
-import { BASE, C, START_COMMAND, START_URL, TERMUX } from './src/config';
+import { BASE, C, START_COMMAND, START_URL, START_WAIT_S, TERMUX } from './src/config';
+import Setup from './src/Setup';
 import { syncHealth } from './src/health';
 
 // react-native-webview 14 types do not accept `ref` on the function component under React 19; the component itself supports it.
 const WebView: any = RNWebView;
-type Phase = 'checking' | 'down' | 'up';
+type Phase = 'checking' | 'starting' | 'down' | 'up' | 'setup';
 
 export default function App() {
   return (
@@ -30,17 +31,44 @@ function Root() {
   const [busy, setBusy] = useState('');
   const [note, setNote] = useState('');
 
-  // ---- is the server running? ----
+  // ---- start the server by itself (Termux RUN_COMMAND), then show the dashboard ----
+  const starting = useRef(false);
+  const startAuto = useCallback(async () => {
+    if (starting.current) return;
+    starting.current = true;
+    setNote(''); setPhase('starting');
+    try {
+      if (await ping()) { setPhase('up'); return; }
+      if (!(await TermuxRun.isInstalled())) { setNote('Termux is not installed on this phone.'); setPhase('down'); return; }
+      if (!(await TermuxRun.hasPermission())) { setNote('LifeOS is not allowed to run commands in Termux yet. Open Setup.'); setPhase('down'); return; }
+      await TermuxRun.run(TERMUX.bash, [TERMUX.script], TERMUX.home, true);
+      for (let i = 0; i < START_WAIT_S; i++) {
+        await new Promise((r) => setTimeout(r, 1000));
+        if (await ping()) { setPhase('up'); return; }
+      }
+      setNote('LifeOS did not start in ' + START_WAIT_S + ' seconds. Open Setup to check each step, or look at ~/lifeos-server.log in Termux.');
+      setPhase('down');
+    } catch (e: any) {
+      setNote((e && e.message ? e.message : 'Could not start it.') + ' Open Setup to check each step.');
+      setPhase('down');
+    } finally { starting.current = false; }
+  }, []);
+
+  // first open: try to start. Back in the app after it was away: check again (the server stops itself when idle).
+  useEffect(() => { startAuto(); }, [startAuto]);
   useEffect(() => {
-    let live = true;
-    const tick = async () => {
-      const ok = await ping();
-      if (live) setPhase((p) => (ok ? (p === 'up' ? p : 'up') : p === 'up' ? p : 'down'));
-    };
-    tick();
-    const t = setInterval(() => { if (phase !== 'up') tick(); }, 2000);
-    return () => { live = false; clearInterval(t); };
-  }, [phase]);
+    const sub = AppState.addEventListener('change', async (st) => {
+      if (st !== 'active' || phase === 'setup' || phase === 'starting') return;
+      if (!(await ping())) startAuto();
+    });
+    return () => sub.remove();
+  }, [phase, startAuto]);
+  // while the app is open, keep the server awake (it counts requests) and notice if it went away
+  useEffect(() => {
+    if (phase !== 'up') return;
+    const t = setInterval(async () => { if (!(await ping()) && !(await ping())) startAuto(); }, 30000);
+    return () => clearInterval(t);
+  }, [phase, startAuto]);
 
   // ---- microphone and camera for the pages (voice, photos) ----
   useEffect(() => {
@@ -57,25 +85,6 @@ function Root() {
     });
     return () => sub.remove();
   }, [menu, phase]);
-
-  // ---- start screen ----
-  const [starting, setStarting] = useState(false);
-  const start = useCallback(async () => {
-    setNote(''); setStarting(true);
-    try {
-      if (!(await TermuxRun.isInstalled())) { setNote('Termux is not installed on this phone.'); setStarting(false); return; }
-      await TermuxRun.run(TERMUX.bash, [TERMUX.script], TERMUX.home, true);
-      setNote('Starting LifeOS…');
-      for (let i = 0; i < 30; i++) {
-        await new Promise((r) => setTimeout(r, 1500));
-        if (await ping()) { setPhase('up'); setStarting(false); return; }
-      }
-      setNote('LifeOS did not start in time. Open Termux and run the command below to see why.');
-    } catch (e: any) {
-      setNote((e && e.message ? e.message : 'Could not start it.') + ' Use the command below in Termux instead.');
-    }
-    setStarting(false);
-  }, []);
 
   // ---- menu actions ----
   const run = async (label: string, fn: () => Promise<string>) => {
@@ -111,34 +120,38 @@ function Root() {
             textZoom={100}
             onNavigationStateChange={onNav}
             onShouldStartLoadWithRequest={allow}
-            onError={() => setPhase('down')}
+            onError={() => startAuto()}
                         injectedJavaScriptBeforeContentLoaded="window.__LIFEOS_APP = 'android'; true;"
           />
           <Pressable accessibilityLabel="Menu" onPress={() => { setNote(''); setMenu(true); }} style={[s.dots, { top: 6 }]} hitSlop={10}>
             <Text style={s.dotsText}>⋮</Text>
           </Pressable>
         </View>
+      ) : phase === 'setup' ? (
+        <Setup onClose={() => startAuto()} />
       ) : (
         <View style={s.center}>
-          <Text style={s.title}>LifeOS</Text>
-          {phase === 'checking' ? (
-            <ActivityIndicator color={C.muted} />
+          <View style={s.logo}><View style={s.logoDot} /></View>
+          {phase === 'checking' || phase === 'starting' ? (
+            <>
+              <Text style={s.title}>Starting R.E.N.E.E.</Text>
+              <ActivityIndicator color={C.muted} />
+              <Text style={s.hint}>This takes a few seconds.</Text>
+            </>
           ) : (
             <>
-              <Text style={s.p}>The LifeOS server on this phone is not running.</Text>
-              <Pressable onPress={start} disabled={starting} style={[s.btn, starting && s.btnOff]}>
-                <Text style={s.btnText}>{starting ? 'Starting…' : 'Start LifeOS'}</Text>
-              </Pressable>
-              {!!note && <Text style={s.note}>{note}</Text>}
-              <View style={s.card}>
-                <Text style={s.small}>Or paste this in Termux:</Text>
-                <Text selectable style={s.code}>{START_COMMAND}</Text>
-                <View style={s.row}>
-                  <Pressable onPress={() => Clipboard.setStringAsync(START_COMMAND).then(() => setNote('Command copied.'))} style={s.chip}><Text style={s.chipText}>Copy</Text></Pressable>
-                  <Pressable onPress={() => TermuxRun.open().catch(() => {})} style={s.chip}><Text style={s.chipText}>Open Termux</Text></Pressable>
-                </View>
+              <Text style={s.title}>R.E.N.E.E. did not start</Text>
+              <Text style={s.p}>{note || 'The LifeOS server on this phone is not running.'}</Text>
+              <Pressable onPress={startAuto} style={s.btn}><Text style={s.btnText}>Retry</Text></Pressable>
+              <View style={s.row}>
+                <Pressable onPress={() => TermuxRun.open().catch(() => {})} style={s.chip}><Text style={s.chipText}>Open Termux</Text></Pressable>
+                <Pressable onPress={() => setPhase('setup')} style={s.chip}><Text style={s.chipText}>Setup</Text></Pressable>
               </View>
-              <Text style={s.hint}>First time? Run phone/setup-termux.sh from the LifeOS-Desktop folder in Termux (see phone/SETUP.md).</Text>
+              <View style={s.card}>
+                <Text style={s.small}>Or start it by hand in Termux:</Text>
+                <Text selectable style={s.code}>{START_COMMAND}</Text>
+                <Pressable onPress={() => Clipboard.setStringAsync(START_COMMAND).then(() => setNote('Command copied.'))} style={s.chip}><Text style={s.chipText}>Copy</Text></Pressable>
+              </View>
             </>
           )}
         </View>
@@ -149,6 +162,7 @@ function Root() {
           <Pressable style={[s.sheet, { marginTop: insets.top + 44 }]} onPress={() => {}}>
             <MenuItem label="Sync vault" busy={busy === 'sync'} onPress={() => run('sync', syncVault)} />
             <MenuItem label="Update health data" busy={busy === 'health'} onPress={() => run('health', syncHealth)} />
+            <MenuItem label="Setup" onPress={() => { setMenu(false); setPhase('setup'); }} />
             <MenuItem label="Reload" onPress={() => { setMenu(false); web.current?.reload(); }} />
             {!!note && <Text style={s.result}>{note}</Text>}
             <MenuItem label="Close" onPress={() => setMenu(false)} muted />
@@ -174,6 +188,8 @@ const s = StyleSheet.create({
   web: { flex: 1, backgroundColor: C.bg },
   dots: { position: 'absolute', right: 8, width: 30, height: 30, borderRadius: 15, backgroundColor: 'rgba(34,34,34,0.7)', alignItems: 'center', justifyContent: 'center' },
   dotsText: { color: C.soft, fontSize: 18, lineHeight: 20, fontWeight: '700' },
+  logo: { width: 84, height: 84, borderRadius: 42, backgroundColor: '#000', alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
+  logoDot: { width: 30, height: 30, borderRadius: 15, backgroundColor: '#F5F5F5' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24, gap: 14 },
   title: { color: C.text, fontSize: 34, fontWeight: '700', letterSpacing: 0.5, marginBottom: 6 },
   p: { color: C.soft, fontSize: 15, textAlign: 'center' },

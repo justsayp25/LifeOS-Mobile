@@ -4,6 +4,8 @@ type TermuxRunType = {
   isInstalled(): Promise<boolean>;
   run(path: string, args: string[], workdir: string, background: boolean): Promise<boolean>;
   open(): Promise<boolean>;
+  hasPermission(): Promise<boolean>;
+  batteryUnrestricted(pkg: string): Promise<boolean>;
 };
 
 // If the native part is missing the app must still open: the start screen then falls back to the copy-able command.
@@ -12,6 +14,6 @@ try {
   mod = requireNativeModule<TermuxRunType>('TermuxRun');
 } catch {
   const no = async () => { throw new Error('The Termux start button is not available in this build.'); };
-  mod = { isInstalled: async () => false, run: no as any, open: async () => false };
+  mod = { isInstalled: async () => false, run: no as any, open: async () => false, hasPermission: async () => false, batteryUnrestricted: async () => false };
 }
 export default mod;

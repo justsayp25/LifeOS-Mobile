@@ -1,6 +1,8 @@
 package expo.modules.termuxrun
 
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.PowerManager
 import expo.modules.kotlin.exception.Exceptions
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
@@ -32,6 +34,15 @@ class TermuxRunModule : Module() {
       }
       context.startService(intent)
       true
+    }
+
+    AsyncFunction("hasPermission") {
+      context.checkSelfPermission("com.termux.permission.RUN_COMMAND") == PackageManager.PERMISSION_GRANTED
+    }
+
+    AsyncFunction("batteryUnrestricted") { pkg: String ->
+      val pm = context.getSystemService(android.content.Context.POWER_SERVICE) as PowerManager
+      pm.isIgnoringBatteryOptimizations(pkg)
     }
 
     AsyncFunction("open") {
