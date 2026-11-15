@@ -12,6 +12,16 @@ import { syncHealth } from './src/health';
 
 // react-native-webview 14 types do not accept `ref` on the function component under React 19; the component itself supports it.
 const WebView: any = RNWebView;
+
+// Runs inside the page. Topmost thing first: an open panel or popup ("Close"), then the page's own back arrow ("Back ...").
+const BACK_JS = `(function () {
+  function vis(e) { var r = e.getBoundingClientRect(), c = getComputedStyle(e); return r.width > 0 && r.height > 0 && c.visibility !== 'hidden' && c.display !== 'none'; }
+  function find(sel) { var l = document.querySelectorAll(sel); for (var i = l.length - 1; i >= 0; i--) if (vis(l[i])) return l[i]; return null; }
+  var el = find('[aria-label="Close"],[aria-label^="Close "]') || find('[aria-label^="Back"]');
+  // tell the app BEFORE pressing: pressing can load another page, which would cut the message off
+  window.ReactNativeWebView.postMessage(el ? 'back:handled' : 'back:none');
+  if (el) el.click();
+})(); true;`;
 type Phase = 'checking' | 'starting' | 'down' | 'up' | 'setup';
 
 export default function App() {
@@ -103,14 +113,31 @@ function Root() {
   }, [phase]);
 
   // ---- Android back: close the menu, then go back a page, then leave ----
+  // The back gesture does what the arrow on the page does: close an open panel first, else press the visible "Back" control,
+  // else go back in history, else leave the app. The page runs this (BACK_JS) and answers 'back:handled' or 'back:none'.
+  const backTimer = useRef<any>(null);
+  const backFallback = useCallback(() => {
+    if (canGoBack.current && web.current) web.current.goBack(); else BackHandler.exitApp();
+  }, []);
   useEffect(() => {
     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
       if (menu) { setMenu(false); return true; }
-      if (phase === 'up' && canGoBack.current && web.current) { web.current.goBack(); return true; }
+      if (phase === 'up' && web.current) {
+        clearTimeout(backTimer.current);
+        backTimer.current = setTimeout(backFallback, 700); // the page did not answer: plain history
+        web.current.injectJavaScript(BACK_JS);
+        return true;
+      }
       return false;
     });
     return () => sub.remove();
-  }, [menu, phase]);
+  }, [menu, phase, backFallback]);
+  const onWebMessage = (e: any) => {
+    const d = e && e.nativeEvent ? e.nativeEvent.data : '';
+    if (d !== 'back:handled' && d !== 'back:none') return;
+    clearTimeout(backTimer.current);
+    if (d === 'back:none') backFallback();
+  };
 
   // ---- menu actions ----
   const run = async (label: string, fn: () => Promise<string>) => {
@@ -156,6 +183,7 @@ function Root() {
             overScrollMode="never"
             textZoom={100}
             onNavigationStateChange={onNav}
+            onMessage={onWebMessage}
             onShouldStartLoadWithRequest={allow}
             onError={() => startAuto()}
                         injectedJavaScriptBeforeContentLoaded="window.__LIFEOS_APP = 'android'; true;"
