@@ -12,6 +12,11 @@ on:
 permissions:
   contents: write
 
+# A newer build cancels the one still running, so only the latest APK is built.
+concurrency:
+  group: android-apk
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
