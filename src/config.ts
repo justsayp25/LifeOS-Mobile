@@ -1,6 +1,6 @@
 // Where the LifeOS server runs on the phone (Termux), and how this app starts it.
 export const BASE = 'http://127.0.0.1:4100';
-export const START_URL = BASE + '/Phone.dc.html?view=phone';
+export const START_URL = BASE + '/?view=phone';
 
 const TERMUX_HOME = '/data/data/com.termux/files/home';
 export const TERMUX = {

@@ -34,10 +34,9 @@ See `BUILD.md`. Expo SDK 58, React Native 0.88, Gradle 9.4, needs JDK 17 (a port
 ## Not tested on a real phone (as of v1.0)
 Everything: the WebView against the Termux server, the Termux start intent (needs `allow-external-apps=true` and the RUN_COMMAND permission; Android 16/17 unconfirmed), Health Connect permissions and data, microphone in the WebView, `backdrop-filter` glass on the phone's WebView, GitHub sync from the phone, Node and Claude Code inside Termux/proot.
 
-## Direction from v1.2 (Jess's decision, replaces the Termux-server design above)
-A native app that holds the vault itself and syncs with GitHub. The agent is Claude Code in Termux, started by the app. No separate server for the dashboard.
-- Vault: shared folder `/storage/emulated/0/LifeOS` (so Termux can read it), needs "All files access". Code in `src/vault/` (`sync.ts` isomorphic-git, tested by `node --experimental-strip-types tools/test-sync.mjs` against a local token-protected git server; `expoFs.ts`, `http.ts`, `vault.ts`).
-- Token: entered once in the app, kept in expo-secure-store, never in the repo.
-- Sync never overwrites or deletes: on a conflict the remote version keeps the note's name and the phone's is saved as `Name (conflict phone <date time>).ext`.
-- Steps: 1 vault + Sync (v1.2.0, done, not yet run on the phone) -> 2 app starts Claude Code in Termux -> 3 chat and voice talk to it -> 4 dashboard pages read the vault.
-- The old WebView/Termux-server app is `src/LegacyApp.tsx` (unused), `src/Setup.tsx` is reused for step 2.
+## Direction from v1.3 (current; replaces the "native app" notes of v1.2)
+Main screen = one WebView on `http://127.0.0.1:4100/?view=phone`. Opening the app shows "Starting R.E.N.E.E.", asks Termux (RUN_COMMAND) to run `~/lifeos-start.sh` (starts the LifeOS-Desktop server inside proot Ubuntu), polls `/api/health` for up to 30 s, then loads the WebView. On failure: message, Retry, Open Termux, Setup.
+- Sync button (menu) = `POST /api/gitsync/run` on the server: phone vault copy <-> GitHub <-> PC. Never overwrites or deletes: conflicts keep both copies, a note deleted on the phone goes to `1 Human/99 Bin` (LifeOS-Desktop >= v1.7.1). The GitHub token lives only on the phone (git credential store inside Ubuntu), never in a repo.
+- Kept but NOT the main screen: `src/vault/*` and `src/VaultApp.tsx` (in-app vault in a shared folder with isomorphic-git, tested by `node --experimental-strip-types tools/test-sync.mjs`; the manifest permission MANAGE_EXTERNAL_STORAGE was removed until it is used again) and the Kotlin Termux module (`modules/termux-run`).
+- The APK is a release build signed with the debug key (standalone). A true Gradle debug build needs a Metro dev server and would not open on its own.
+- Nothing from v1.1 on has been run on the real phone yet (as of v1.3.0).
