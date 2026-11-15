@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>LifeOS — Areas (phone)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: #121212; font-family: 'IBM Plex Sans', sans-serif; }
+  a { color: inherit; text-decoration: none; }
+  ::selection { background: rgba(255,255,255,0.22); }
+  button { font: inherit; color: inherit; }
+  button:focus-visible, a:focus-visible { outline: 2px solid #BDBDBD; outline-offset: 2px; }
+  h1, h2, p { margin: 0; }
+  input { font: inherit; color-scheme: dark; }
+  input::placeholder { color: #8A8A8A; }
+  input:focus-visible { outline: 2px solid #BDBDBD; outline-offset: 1px; }
+  @keyframes lgFade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes lgIn { 0% { opacity: 0; transform: translateY(22px) scale(0.82); filter: blur(10px); } 55% { opacity: 1; transform: translateY(-3px) scale(1.025); filter: blur(0); } 100% { opacity: 1; transform: none; filter: blur(0); } }
+  @keyframes lgItem { 0% { opacity: 0; transform: translateY(10px) scale(0.5); filter: blur(6px); } 65% { opacity: 1; transform: scale(1.1); filter: blur(0); } 100% { opacity: 1; transform: none; filter: blur(0); } }
+  .lg-item { transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.18s; }
+  .lg-item:active { transform: scale(0.88); background: rgba(255,255,255,0.14); }
+  @media (prefers-reduced-motion: reduce) { .lg-anim, .lg-item { animation: none !important; transition: none !important; } }
+  @keyframes agIn { 0% { opacity: 0; transform: translateY(28px) scale(0.8); filter: blur(10px); } 60% { opacity: 1; transform: translateY(-4px) scale(1.015); filter: blur(0); } 100% { opacity: 1; transform: none; filter: blur(0); } }
+  @media (prefers-reduced-motion: reduce) { .ag-anim { animation: none !important; } }
+  @keyframes pgFade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes pgUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  h1 { animation: pgUp 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) backwards; }
+  section, article, svg:not([width="22"]):not([width="14"]):not([width="16"]):not([width="18"]):not([width="20"]) { animation: pgFade 0.45s ease backwards; }
+  button[style*="border-radius: 16px"], div[style*="background: #1A1A1A"][style*="border-radius: 16px"] { animation: pgUp 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) backwards; }
+  button[style*="border-radius: 16px"]:nth-child(2), div[style*="border-radius: 16px"]:nth-child(2) { animation-delay: 0.03s; }
+  button[style*="border-radius: 16px"]:nth-child(3), div[style*="border-radius: 16px"]:nth-child(3) { animation-delay: 0.06s; }
+  button[style*="border-radius: 16px"]:nth-child(4), div[style*="border-radius: 16px"]:nth-child(4) { animation-delay: 0.09s; }
+  button[style*="border-radius: 16px"]:nth-child(n+5), div[style*="border-radius: 16px"]:nth-child(n+5) { animation-delay: 0.12s; }
+  button:not(.lg-scrim), a { transition: transform 0.16s ease, opacity 0.16s ease, background-color 0.16s ease, border-color 0.16s ease; }
+  button:not(.lg-scrim):active { transform: scale(0.97); }
+  @media (hover: hover) { button:not(.lg-scrim):hover, a:hover { opacity: 0.88; } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+</style>
+</helmet>
+
+<div style="position: relative; width: 390px; height: 844px; box-sizing: border-box; display: flex; flex-direction: column; background: #121212; color: #EDEDED; overflow: hidden;">
+
+  <!-- SCROLL AREA -->
+  
+
+  <!-- QUICK CAPTURE -->
+  <!-- AGENT BUTTON -->
+  <button type="button" aria-label="Open agent (hold to talk)" aria-expanded="{{chatOpen}}" onClick="{{agentClick}}" onPointerDown="{{agentDown}}" onPointerUp="{{agentUp}}" onPointerCancel="{{agentUp}}" onContextMenu="{{noMenu}}" style="position: absolute; left: 50%; margin-left: -26px; bottom: 22px; width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #000000; border: 1.5px solid {{agentRing}}; cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none; box-shadow: 0 6px 18px rgba(0,0,0,0.6); z-index: 30;"><span style="width: 12px; height: 12px; border-radius: 50%; background: #F5F5F5;"></span></button>
+
+  <sc-if value="{{chatOpen}}" hint-placeholder-val="{{ false }}">
+  <section aria-label="Agent" class="ag-anim" style="transform-origin: 50% 100%; animation: agIn 0.5s cubic-bezier(0.34, 1.4, 0.64, 1) backwards; position: absolute; left: 12px; right: 12px; top: 56px; bottom: 96px; display: flex; flex-direction: column; box-sizing: border-box; border-radius: 20px; background: #1A1A1A; border: 1px solid #2E2E2E; box-shadow: 0 16px 48px rgba(0,0,0,0.6); z-index: 25; overflow: hidden;">
+    <div style="display: flex; align-items: center; justify-content: space-between; padding: 6px 8px 6px 16px; border-bottom: 1px solid #262626;">
+      <span style="display: flex; align-items: center; gap: 10px; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 15px; color: #F5F5F5;"><span style="width: 8px; height: 8px; border-radius: 50%; background: #F5F5F5;"></span>Agent</span>
+      <button type="button" onClick="{{closeChat}}" aria-label="Close agent" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: none; border: 0; cursor: pointer; color: #B5B5B5;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
+    </div>
+    <div style="flex: 1; min-height: 0; overflow-y: auto; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;">
+      <sc-if value="{{noMsgs}}" hint-placeholder-val="{{ true }}">
+        <div style="margin: auto 0; display: flex; flex-direction: column; gap: 12px;">
+          <p style="font-size: 14px; line-height: 1.5; color: #A8A8A8;">Ask Claude about your day, tasks and habits. It can't read your vault yet.</p>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <sc-for list="{{prompts}}" as="q" hint-placeholder-count="3">
+              <button type="button" onClick="{{q.pick}}" style="min-height: 36px; padding: 0 14px; border-radius: 999px; background: #222222; border: 1px solid #333; cursor: pointer; font-size: 13px; color: #D0D0D0;">{{q.text}}</button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+      <sc-for list="{{msgs}}" as="m" hint-placeholder-count="2">
+        <div style="align-self: {{m.align}}; max-width: 85%; padding: 9px 13px; border-radius: 14px; font-size: 14px; line-height: 1.45; background: {{m.bg}}; color: {{m.fg}};">{{m.text}}</div>
+      </sc-for>
+    </div>
+    <sc-if value="{{voiceNote}}" hint-placeholder-val="{{ false }}">
+      <p style="padding: 0 16px 8px; font-size: 12.5px; color: #B5B5B5;">{{voiceNote}}</p>
+    </sc-if>
+    <div style="display: flex; align-items: center; gap: 8px; padding: 10px 12px 12px; border-top: 1px solid #262626;">
+      <input type="text" aria-label="Message the agent" placeholder="{{placeholder}}" value="{{draft}}" onInput="{{onDraft}}" onKeyDown="{{onDraftKey}}" style="flex: 1; min-width: 0; height: 44px; box-sizing: border-box; padding: 0 14px; border-radius: 12px; background: #222222; border: 1px solid #333; color: #F5F5F5; font-size: 14px;">
+      <button type="button" onClick="{{toggleMic}}" aria-label="Voice input" aria-pressed="{{listening}}" style="width: 44px; height: 44px; flex: 0 0 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: {{micBg}}; border: 1px solid #333; color: {{micFg}};"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"></rect><path d="M5 11a7 7 0 0 0 14 0M12 18v3"></path></svg></button>
+      <button type="button" onClick="{{sendMsg}}" aria-label="Send" style="width: 44px; height: 44px; flex: 0 0 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: #EDEDED; border: 0; color: #121212;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"></path></svg></button>
+    </div>
+  </section>
+  </sc-if>
+
+  <!-- BOTTOM TABS -->
+  <sc-if value="{{navOpen}}" hint-placeholder-val="{{ false }}"><div style="position: absolute; inset: 0; z-index: 60;"><button type="button" onClick="{{closeNav}}" aria-label="Close menu" class="lg-anim" style="position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; background: rgba(0,0,0,0.35); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); cursor: default; animation: lgFade 0.22s ease-out backwards;"></button><nav aria-label="{{navTitle}}" class="lg-anim" style="position: absolute; z-index: 41; left: 16px; right: 16px; bottom: 92px; height: 64px; box-sizing: border-box; padding: 0 8px; border-radius: 32px; display: flex; align-items: center; justify-content: space-around; background: rgba(46,46,46,0.55); -webkit-backdrop-filter: blur(24px) saturate(170%); backdrop-filter: blur(24px) saturate(170%); border: 1px solid rgba(255,255,255,0.14); box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), inset 0 -1px 0 rgba(255,255,255,0.05), 0 16px 40px rgba(0,0,0,0.5); transform-origin: 50% 100%; animation: lgIn 0.46s cubic-bezier(0.34, 1.4, 0.64, 1) backwards;"><sc-for list="{{navItems}}" as="n" hint-placeholder-count="5"><a href="{{n.href}}" onClick="{{n.close}}" aria-label="{{n.t}}" class="lg-item" style="flex: 1 0 44px; min-width: 44px; height: 48px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border-radius: 24px; color: {{n.color}}; animation: lgItem 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) {{n.delay}} backwards;"><sc-if value="{{n.iTasks}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 11 3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg></sc-if><sc-if value="{{n.iCalendar}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><path d="M8 14h.01"></path><path d="M12 14h.01"></path><path d="M16 14h.01"></path><path d="M8 18h.01"></path><path d="M12 18h.01"></path></svg></sc-if><sc-if value="{{n.iProjects}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2Z"></path></svg></sc-if><sc-if value="{{n.iHealth}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg></sc-if><sc-if value="{{n.iMMA}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11V8.3a2.3 2.3 0 0 1 4.6 0V10"></path><path d="M13.6 9.8a2.3 2.3 0 0 1 4.4.9V15a5.5 5.5 0 0 1-5.5 5.5h-1A5.5 5.5 0 0 1 6 15v-2.7c0-1.1.9-1.8 1.8-1.8H9"></path><rect x="7.5" y="16" width="9" height="4.2" rx="1.6"></rect></svg></sc-if><sc-if value="{{n.iSpiritual}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20"></path><path d="M6 8h12"></path></svg></sc-if><sc-if value="{{n.iWork}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg></sc-if><sc-if value="{{n.iFinances}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg></sc-if><sc-if value="{{n.iJournal}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20 M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"></path></svg></sc-if><sc-if value="{{n.iCollege}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 10-10-5-10 5 10 5 10-5Z M6 12v5c3 3 9 3 12 0v-5"></path></svg></sc-if><sc-if value="{{n.iLanguages}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6 M4 14l6-6 2-3 M2 5h12 M7 2h1 m22 22-5-10-5 10 M14 18h6"></path></svg></sc-if><sc-if value="{{n.iSelfStudy}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5 M9 18h6 M10 22h4"></path></svg></sc-if><sc-if value="{{n.iResources}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2Z"></path></svg></sc-if><sc-if value="{{n.iPeople}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8 M22 21v-2a4 4 0 0 0-3-3.9 M16 3.1a4 4 0 0 1 0 7.8"></path></svg></sc-if><sc-if value="{{n.iPlaces}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z M12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6"></path></svg></sc-if></a></sc-for></nav></div></sc-if>
+  <nav aria-label="Main" style="position: absolute; z-index: 25; left: 16px; right: 16px; bottom: 16px; height: 64px; box-sizing: border-box; padding: 0 14px; border-radius: 32px; display: flex; align-items: center; justify-content: space-around; background: #1E1E1E; border: 1px solid #2E2E2E; box-shadow: 0 10px 28px rgba(0,0,0,0.55);">
+    <a href="Phone.dc.html" aria-label="Home" onPointerDown="{{navDownHome}}" onPointerUp="{{navUp}}" onPointerCancel="{{navUp}}" onContextMenu="{{noMenu}}" onClick="{{navClick}}" style="width: 56px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center; background: transparent; color: #9A9A9A;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-7 9 7"></path><path d="M5 10v10a1 1 0 0 0 1 1h3v-6h6v6h3a1 1 0 0 0 1-1V10"></path></svg></a>
+    <a href="AreasPhone.dc.html" aria-label="Areas" onPointerDown="{{navDownAreas}}" onPointerUp="{{navUp}}" onPointerCancel="{{navUp}}" onContextMenu="{{noMenu}}" onClick="{{navClick}}" aria-current="page" style="width: 56px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center; background: #2C2C2C; color: #F5F5F5;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg></a>
+    <span aria-hidden="true" style="width: 60px; flex: 0 0 60px;"></span>
+    <a href="KnowledgePhone.dc.html" aria-label="Knowledge" onPointerDown="{{navDownKnowledge}}" onPointerUp="{{navUp}}" onPointerCancel="{{navUp}}" onContextMenu="{{noMenu}}" onClick="{{navClick}}" style="width: 56px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center; background: transparent; color: #9A9A9A;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"></path></svg></a>
+    <a href="PerformancePhone.dc.html" aria-label="Performance" style="width: 56px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center; background: transparent; color: #9A9A9A;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line><line x1="6" y1="20" x2="6" y2="16"></line></svg></a>
+  </nav>
+  <div style="flex: 1; min-height: 0; overflow-y: auto; box-sizing: border-box; padding: 18px 16px 96px; display: flex; flex-direction: column;">
+      <sc-if value="{{listView}}" hint-placeholder-val="{{ true }}">
+      <h1 style="margin-top: 6px; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 34px; line-height: 1.05; letter-spacing: -0.02em; color: #F5F5F5;">Areas</h1>
+      <p style="margin: 4px 0 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.1em; color: #8A8A8A;"><br></p>
+      <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 10px;">
+        <sc-for list="{{areas}}" as="a" hint-placeholder-count="5">
+          <sc-if value="{{a.isLink}}" hint-placeholder-val="{{ false }}"><a href="{{a.href}}" aria-label="{{a.label}}" title="{{a.title}}" style="text-decoration: none; width: 100%; box-sizing: border-box; min-height: 76px; display: flex; align-items: center; gap: 16px; padding: 12px 16px; border-radius: 20px; background: #1A1A1A; border: 1px solid #292929; cursor: pointer; text-align: left; color: inherit;"><span style="width: 52px; height: 52px; flex: 0 0 52px; border-radius: 16px; display: flex; align-items: center; justify-content: center; background: #222222; border: 1px solid #2E2E2E; color: #E0E0E0;"><sc-if value="{{a.isHealth}}" hint-placeholder-val="{{ false }}"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg></sc-if><sc-if value="{{a.isMMA}}" hint-placeholder-val="{{ false }}"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11V8.3a2.3 2.3 0 0 1 4.6 0V10"></path><path d="M13.6 9.8a2.3 2.3 0 0 1 4.4.9V15a5.5 5.5 0 0 1-5.5 5.5h-1A5.5 5.5 0 0 1 6 15v-2.7c0-1.1.9-1.8 1.8-1.8H9"></path><rect x="7.5" y="16" width="9" height="4.2" rx="1.6"></rect></svg></sc-if><sc-if value="{{a.isSpiritual}}" hint-placeholder-val="{{ false }}"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20"></path><path d="M6 8h12"></path></svg></sc-if><sc-if value="{{a.isWork}}" hint-placeholder-val="{{ false }}"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg></sc-if><sc-if value="{{a.isFinances}}" hint-placeholder-val="{{ false }}"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg></sc-if></span><span style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 19px; letter-spacing: -0.01em; color: #F5F5F5;">{{a.name}}</span></a></sc-if><sc-if value="{{a.notLink}}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{a.open}}" aria-label="{{a.label}}" title="{{a.title}}" style="width: 100%; box-sizing: border-box; min-height: 76px; display: flex; align-items: center; gap: 16px; padding: 12px 16px; border-radius: 20px; background: #1A1A1A; border: 1px solid #292929; cursor: pointer; text-align: left; color: inherit;"><span style="width: 52px; height: 52px; flex: 0 0 52px; border-radius: 16px; display: flex; align-items: center; justify-content: center; background: #222222; border: 1px solid #2E2E2E; color: #E0E0E0;"><sc-if value="{{a.isHealth}}" hint-placeholder-val="{{ false }}"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg></sc-if><sc-if value="{{a.isMMA}}" hint-placeholder-val="{{ false }}"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11V8.3a2.3 2.3 0 0 1 4.6 0V10"></path><path d="M13.6 9.8a2.3 2.3 0 0 1 4.4.9V15a5.5 5.5 0 0 1-5.5 5.5h-1A5.5 5.5 0 0 1 6 15v-2.7c0-1.1.9-1.8 1.8-1.8H9"></path><rect x="7.5" y="16" width="9" height="4.2" rx="1.6"></rect></svg></sc-if><sc-if value="{{a.isSpiritual}}" hint-placeholder-val="{{ false }}"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20"></path><path d="M6 8h12"></path></svg></sc-if><sc-if value="{{a.isWork}}" hint-placeholder-val="{{ false }}"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg></sc-if><sc-if value="{{a.isFinances}}" hint-placeholder-val="{{ false }}"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg></sc-if></span><span style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 19px; letter-spacing: -0.01em; color: #F5F5F5;">{{a.name}}</span></button></sc-if>
+        </sc-for>
+      </div>
+      </sc-if>
+      <sc-if value="{{detailView}}" hint-placeholder-val="{{ false }}">
+      <button type="button" onClick="{{closeArea}}" aria-label="Back to Areas" style="flex-shrink: 0; width: 44px; min-height: 44px; margin-left: -14px; padding: 0; display: inline-flex; align-items: center; justify-content: center; background: none; border: 0; cursor: pointer; font-size: 14px; color: #B5B5B5;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></button>
+      <div style="display: flex; align-items: center; gap: 14px; margin-top: 6px;">
+        <h1 style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 34px; line-height: 1.05; letter-spacing: -0.02em; color: #F5F5F5;">{{d.name}}</h1>
+      </div>
+      <sc-if value="{{d.isWork}}" hint-placeholder-val="{{ false }}"><section style="margin-top: 16px; box-sizing: border-box; min-height: 160px; padding: 24px 16px; border-radius: 16px; background: #1A1A1A; border: 1px solid #292929; display: flex; align-items: center; justify-content: center; text-align: center;"><p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.1em; color: #8A8A8A;">UNDER CONSTRUCTION</p></section></sc-if><sc-if value="{{d.notWork}}" hint-placeholder-val="{{ true }}"><section style="margin-top: 20px; border-radius: 16px; background: #1A1A1A; border: 1px solid #292929; overflow: hidden;">
+        <h2 style="padding: 14px 16px; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 16px; color: #F5F5F5;">Folders</h2>
+        <sc-if value="{{d.noNotes}}" hint-placeholder-val="{{ false }}"><p style="padding: 0 16px 14px; font-size: 13.5px; color: #8A8A8A;">No notes in these folders yet.</p></sc-if>
+        <sc-for list="{{d.rows}}" as="r" hint-placeholder-count="6">
+          <div title="{{r.title}}" style="display: flex; align-items: center; gap: 10px; min-height: 44px; box-sizing: border-box; padding: 8px 16px 8px {{r.pad}}; border-top: 1px solid #242424;">
+            <sc-if value="{{r.isFolder}}" hint-placeholder-val="{{ true }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9A9A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2Z"></path></svg></sc-if>
+            <sc-if value="{{r.isNote}}" hint-placeholder-val="{{ false }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9A9A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path></svg></sc-if>
+            <span style="flex: 1; min-width: 0; font-size: 14px; color: {{r.nameColor}};">{{r.name}}</span>
+            <sc-if value="{{r.hasChip}}" hint-placeholder-val="{{ false }}"><span style="flex: 0 0 auto; padding: 2px 8px; border-radius: 999px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.06em; color: #C8C8C8; border: 1px solid #3A3A3A;">{{r.chip}}</span></sc-if>
+          </div>
+        </sc-for>
+      </section></sc-if>
+      </sc-if>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"hour12":{"editor":"boolean","default":true},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  componentDidMount() {
+    // island: slide the active pill from the previous section to this one
+    try {
+      const go = () => {
+        const nav = document.querySelector('nav[aria-label="Main"]');
+        const cur = nav && nav.querySelector('a[aria-current]');
+        if (!cur || !cur.animate) return;
+        const name = cur.getAttribute('aria-label');
+        let prev = '';
+        try { prev = window.sessionStorage.getItem('lifeos-island') || ''; window.sessionStorage.setItem('lifeos-island', name); } catch (e) {}
+        const old = prev && prev !== name ? nav.querySelector('a[aria-label="' + prev + '"]') : null;
+        const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reduce) return;
+        const ease = 'cubic-bezier(0.34, 1.56, 0.64, 1)';
+        if (old) {
+          const a = old.getBoundingClientRect(), b = cur.getBoundingClientRect();
+          const dx = (a.left + a.width / 2) - (b.left + b.width / 2);
+          cur.animate([
+            { transform: 'translateX(' + dx + 'px) scale(1, 1)' },
+            { transform: 'translateX(' + dx * 0.45 + 'px) scale(1.5, 0.9)', offset: 0.42 },
+            { transform: 'translateX(0) scale(1, 1)' }
+          ], { duration: 620, easing: ease });
+        } else {
+          cur.animate([{ transform: 'scale(0.6)', opacity: 0.4 }, { transform: 'scale(1.1)', opacity: 1, offset: 0.6 }, { transform: 'scale(1)', opacity: 1 }], { duration: 480, easing: ease });
+        }
+      };
+      setTimeout(go, 40);
+    } catch (e) {}
+  }
+  renderVals() {
+    const s = this.state || {};
+
+    // areas — real folder structure from 1 Human in the vault (nothing invented). [name, depth, chip, isNote]
+    const AREAS = [
+      { name: 'Health', path: '1 Human/11 Health', upd: '09/09', tree: [
+        ['Information', 0], ['Performance', 1], ['Hypertrophy', 2], ['MMA Performance', 2], ['Power', 2], ['Rotation', 2], ['Speed', 2], ['Strength', 2],
+        ['Programs', 1], ['Recovery', 1], ['Nutrition', 2], ['Sleep', 2], ['Supplements', 2],
+        ['Tracker', 0], ['Lifts', 1, 'LOG'], ['Physical Therapy', 1, 'LOG'], ['Recovery Tracker', 1, 'LOG'], ['Runs', 1, 'LOG'] ] },
+      { name: 'MMA', path: '1 Human/12 MMA', upd: '09/09', tree: [
+        ['Grappling', 0], ['Brazilian Jiu Jitsu', 1], ['Judo', 1], ['Wrestling', 1],
+        ['Hybrid Styles', 0], ['Jeet Kune Do', 1],
+        ['Striking', 0], ['Boxing', 1], ['Kickboxing', 1], ['Muay Thai', 1],
+        ['Weaponry', 0], ['Eskrima', 1], ['Kali', 1] ] },
+      { name: 'Spiritual', path: '1 Human/06 Spiritual', upd: '09/11', tree: [['New Testament', 0], ['Old Testament', 0]] },
+      { name: 'Work', path: '1 Human/14 Work', upd: '09/11', tree: [
+        ['Freelance Work', 0], ['Karigawa', 0], ['Virtual Assistance', 0], ['WebWarriorz', 0, 'PROJECT'], ['marcheone', 0, 'PROJECT'] ] },
+      { name: 'Finances', path: '1 Human/13 Finance', upd: '09/09', tree: [
+        ['Assets', 0], ['Cash', 1, 'LOG', 1], ['DragonFi', 1, 'LOG', 1], ['GCash', 1, 'LOG', 1], ['GoTrade', 1, 'LOG', 1], ['GoTYME', 1, 'LOG', 1], ['Maribank', 1, 'LOG', 1], ['Maya', 1, 'LOG', 1], ['Wise', 1, 'LOG', 1] ] }
+    ];
+    const goTop = () => { try { window.scrollTo(0, 0); } catch (e) {} };
+    const openName = s.openArea || '';
+    const stats = (A) => {
+      const notes = A.tree.filter((r) => r[3] || r[2]).length;
+      const folders = A.tree.filter((r) => !r[3]).length;
+      return { notes, folders };
+    };
+    const HREFS = { Health: 'HealthPhone.dc.html', MMA: 'MmaPhone.dc.html', Spiritual: 'SpiritualPhone.dc.html', Finances: 'FinancesPhone.dc.html' };
+    const areaCards = AREAS.map((A) => {
+      const st = stats(A);
+      return {
+        name: A.name, label: 'Open ' + A.name, notLink: !HREFS[A.name], isLink: !!HREFS[A.name], href: HREFS[A.name] || '#',
+        isHealth: A.name === 'Health', isMMA: A.name === 'MMA', isSpiritual: A.name === 'Spiritual', isWork: A.name === 'Work', isFinances: A.name === 'Finances',
+        preview: A.tree.filter((r) => r[1] === 0 && !r[3]).map((r) => r[0]).join(' · '),
+        foldersText: st.folders + (st.folders === 1 ? ' FOLDER' : ' FOLDERS'),
+        notesText: st.notes ? st.notes + (st.notes === 1 ? ' NOTE' : ' NOTES') : 'NO NOTES YET',
+        updText: 'UPDATED ' + A.upd,
+        title: A.path,
+        open: () => { this.setState({ openArea: A.name }); goTop(); }
+      };
+    });
+    const totF = AREAS.reduce((n, A) => n + stats(A).folders, 0);
+    const totN = AREAS.reduce((n, A) => n + stats(A).notes, 0);
+    const summary = AREAS.length + ' AREAS';
+    const curA = AREAS.find((A) => A.name === openName);
+    const detail = curA ? (() => {
+      const st = stats(curA);
+      return {
+        name: curA.name, path: curA.path, notWork: curA.name !== 'Work',
+        isHealth: curA.name === 'Health', isMMA: curA.name === 'MMA', isSpiritual: curA.name === 'Spiritual', isWork: curA.name === 'Work', isFinances: curA.name === 'Finances',
+        meta: st.folders + (st.folders === 1 ? ' FOLDER' : ' FOLDERS') + ' · ' + (st.notes ? st.notes + (st.notes === 1 ? ' NOTE' : ' NOTES') : 'NO NOTES YET') + ' · UPDATED ' + curA.upd,
+        noNotes: st.notes === 0,
+        rows: curA.tree.map((r) => ({
+          name: r[0], pad: (14 + r[1] * 22) + 'px', isNote: !!r[3], isFolder: !r[3],
+          hasChip: !!r[2], chip: r[2] || '',
+          title: curA.path + '/' + r[0], nameColor: r[3] ? '#C8C8C8' : '#EDEDED'
+        }))
+      };
+    })() : { name: '', path: '', notWork: false, meta: '', noNotes: false, rows: [], isHealth: false, isMMA: false, isSpiritual: false, isWork: false, isFinances: false };
+    const subs = {};
+    AREAS.forEach((A) => {
+      const on = openName === A.name;
+      subs['sub' + A.name] = () => { this.setState({ openArea: A.name }); goTop(); };
+      subs['bg' + A.name] = on ? '#1F1F1F' : 'transparent';
+      subs['fg' + A.name] = on ? '#F5F5F5' : '#9A9A9A';
+    });
+    // agent
+    const chatOpen = !!s.chatOpen;
+    const listening = !!s.listening;
+    const msgs = (s.msgs || []).map((m) => ({
+      text: m.text,
+      align: m.role === 'user' ? 'flex-end' : 'flex-start',
+      bg: m.role === 'user' ? '#EDEDED' : '#222222',
+      fg: m.role === 'user' ? '#121212' : '#B5B5B5'
+    }));
+    const prompts = ["What's due today?", 'Plan my day', 'Summarize this week'].map((text) => ({
+      text, pick: () => this.setState({ draft: text })
+    }));
+    const agentCtx = () => {
+      const out = [];
+      try { out.push('Today is ' + new Date().toDateString() + '. Page open: ' + ((typeof document !== 'undefined' && document.title) || 'LifeOS') + '.'); } catch (e) {}
+      try { if (typeof habits !== 'undefined') out.push('Habits today: ' + habits.map((h) => h.name + (h.done ? ' (done)' : ' (not yet)')).join(', ') + '.'); } catch (e) {}
+      try { if (typeof taskGroups !== 'undefined') out.push('Tasks: ' + (taskGroups.length ? taskGroups.map((g) => g.label + ': ' + g.items.map((t) => t.title).join('; ')).join(' | ') : 'none') + '.'); } catch (e) {}
+      try { if (typeof perf !== 'undefined' && perf.overall) out.push('Performance: overall ' + perf.overall.text + '/5 (' + perf.overall.delta + '); ' + perf.cards.map((c) => c.name + ' ' + c.score + ' ' + c.hab).join('; ') + '; reviews saved: ' + perf.count + '.'); } catch (e) {}
+      return out.join('\n');
+    };
+    const sendMsg = async () => {
+      const st = this.state || {};
+      const text = (st.draft || '').trim();
+      if (!text || st.thinking) return;
+      const history = (st.msgs || []).filter((m) => !m.err && m.text).slice(-8);
+      this.setState({ msgs: [...(st.msgs || []), { role: 'user', text }, { role: 'agent', text: 'Thinking…' }], draft: '', thinking: true });
+      const setLast = (t, err) => { const a = ((this.state || {}).msgs || []).slice(); a[a.length - 1] = { role: 'agent', text: t, err: !!err }; this.setState({ msgs: a }); };
+      try {
+        let cl = null;
+        try { cl = window.claude || (window.parent && window.parent.claude) || (window.top && window.top.claude) || null; } catch (e) { cl = window.claude || null; }
+        if (!cl) { setLast("Claude isn't reachable from this view. The page has no link to it here.", true); return; }
+        const sample = await cl.use('sample');
+        if (!sample) { setLast("Claude isn't available in this view.", true); return; }
+        const prompt = "You are the assistant inside Jess's LifeOS dashboard. Reply in a few short, plain sentences. You can only see the context below, not his Obsidian vault yet. If he asks about something outside it, say you can't see it yet. Never invent data.\n\nContext:\n" + agentCtx() + "\n\nConversation:\n" + history.map((m) => (m.role === 'user' ? 'Jess: ' : 'You: ') + m.text).join('\n') + (history.length ? '\n' : '') + 'Jess: ' + text + '\nYou:';
+        const r = await sample(prompt, { modelTier: 'quick', cache: false, onText: (o) => setLast(o.text) });
+        setLast((r && r.text) || 'No answer came back.');
+      } catch (e) {
+        setLast(e && e.code === 'not_granted' ? 'Claude is switched off for this view. Allow it when asked.' : e && e.code === 'rate_limited' ? 'Too many requests. Try again in a moment.' : (e && e.text) ? e.text : "Couldn't reach Claude" + (e && (e.code || e.message) ? ' (' + String(e.code || e.message).slice(0, 80) + ')' : '') + '. Try again.', !(e && e.text));
+      } finally { this.setState({ thinking: false }); }
+    };
+    const startVoice = () => {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) { this.setState({ chatOpen: true, voiceNote: "Voice input isn't available in this view." }); return; }
+      try {
+        const rec = new SR();
+        rec.interimResults = true;
+        rec.continuous = true;
+        rec.onresult = (e) => {
+          let t = '';
+          for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
+          this.setState({ draft: t });
+        };
+        rec.onend = () => this.setState({ listening: false });
+        rec.onerror = () => this.setState({ listening: false, voiceNote: "Couldn't use the microphone here." });
+        this._rec = rec;
+        rec.start();
+        this.setState({ chatOpen: true, listening: true, voiceNote: '' });
+      } catch (err) {
+        this.setState({ chatOpen: true, voiceNote: "Couldn't use the microphone here." });
+      }
+    };
+    const stopVoice = () => { try { if (this._rec) this._rec.stop(); } catch (err) {} this.setState({ listening: false }); };
+    // long-press menu on the bottom island
+    const NAVS = {
+      home: ['HOME', [['Tasks', 'TasksPhone.dc.html'], ['Calendar', 'CalendarPhone.dc.html'], ['Projects', 'ProjectsPhone.dc.html']]],
+      areas: ['AREAS', [['Health', 'HealthPhone.dc.html'], ['MMA', 'MmaPhone.dc.html'], ['Spiritual', 'SpiritualPhone.dc.html'], ['Work', 'AreasPhone.dc.html'], ['Finances', 'FinancesPhone.dc.html']]],
+      knowledge: ['KNOWLEDGE', [['Journal', 'KnowledgePhone.dc.html?sec=Journal'], ['College', 'KnowledgePhone.dc.html?sec=College'], ['Languages', 'KnowledgePhone.dc.html?sec=Languages'], ['Self-Study', 'KnowledgePhone.dc.html?sec=Self-Study'], ['Resources', 'KnowledgePhone.dc.html?sec=Resources'], ['People', 'KnowledgePhone.dc.html?sec=People'], ['Places', 'KnowledgePhone.dc.html?sec=Places']]]
+    };
+    const navKey = (this.state || {}).navMenu || '';
+    const navItems = navKey ? NAVS[navKey][1].map(([t, href], i) => {
+      const o = { t, href, delay: (70 + i * 45) + 'ms', color: href === '#' ? '#8A8A8A' : '#EDEDED', close: () => this.setState({ navMenu: '' }) };
+      ['Tasks', 'Calendar', 'Projects', 'Health', 'MMA', 'Spiritual', 'Work', 'Finances', 'Journal', 'College', 'Languages', 'SelfStudy', 'Resources', 'People', 'Places'].forEach((k) => { o['i' + k] = k === t.replace('-', ''); });
+      return o;
+    }) : [];
+    const navDown = (k) => () => { this._navLong = false; clearTimeout(this._nt); this._nt = setTimeout(() => { this._navLong = true; this.setState({ navMenu: k }); }, 450); };
+    return {
+      navOpen: !!navKey, navTitle: navKey ? NAVS[navKey][0] : '', navItems,
+      closeNav: () => this.setState({ navMenu: '' }),
+      navDownHome: navDown('home'), navDownAreas: navDown('areas'), navDownKnowledge: navDown('knowledge'),
+      navUp: () => clearTimeout(this._nt),
+      navClick: (e) => { if (this._navLong) { if (e && e.preventDefault) e.preventDefault(); this._navLong = false; } },
+      areas: areaCards, summary, listView: !curA, detailView: !!curA, d: detail,
+      closeArea: () => { this.setState({ openArea: '' }); goTop(); },
+      ...subs,
+      chatOpen, listening, msgs, prompts, sendMsg,
+      noMsgs: msgs.length === 0,
+      draft: s.draft || '', voiceNote: s.voiceNote || '',
+      placeholder: listening ? 'Listening…' : 'Ask your vault',
+      agentRing: listening ? '#F5F5F5' : '#3A3A3A',
+      micBg: listening ? '#EDEDED' : '#222222',
+      micFg: listening ? '#121212' : '#D0D0D0',
+      closeChat: () => { stopVoice(); this.setState({ chatOpen: false }); },
+      onDraft: (e) => this.setState({ draft: e.target.value }),
+      onDraftKey: (e) => { if (e.key === 'Enter') sendMsg(); },
+      toggleMic: () => ((this.state || {}).listening ? stopVoice() : startVoice()),
+      noMenu: (e) => { if (e && e.preventDefault) e.preventDefault(); },
+      agentDown: () => {
+        this._long = false;
+        clearTimeout(this._lp);
+        this._lp = setTimeout(() => { this._long = true; startVoice(); }, 550);
+      },
+      agentUp: () => {
+        clearTimeout(this._lp);
+        if (this._long) stopVoice();
+      },
+      agentClick: () => {
+        if (this._long) { this._long = false; return; }
+        const st = this.state || {};
+        if (st.chatOpen) { stopVoice(); this.setState({ chatOpen: false }); } else this.setState({ chatOpen: true });
+      },
+    };
+  }
+}
+</script>

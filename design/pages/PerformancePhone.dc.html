@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>LifeOS — Finances (phone)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: #121212; font-family: 'IBM Plex Sans', sans-serif; }
+  a { color: inherit; text-decoration: none; }
+  ::selection { background: rgba(255,255,255,0.22); }
+  button { font: inherit; color: inherit; }
+  button:focus-visible, a:focus-visible { outline: 2px solid #BDBDBD; outline-offset: 2px; }
+  h1, h2, p { margin: 0; }
+  input { font: inherit; color-scheme: dark; }
+  input::placeholder { color: #8A8A8A; }
+  input:focus-visible { outline: 2px solid #BDBDBD; outline-offset: 1px; }
+  @keyframes lgFade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes lgIn { 0% { opacity: 0; transform: translateY(22px) scale(0.82); filter: blur(10px); } 55% { opacity: 1; transform: translateY(-3px) scale(1.025); filter: blur(0); } 100% { opacity: 1; transform: none; filter: blur(0); } }
+  @keyframes lgItem { 0% { opacity: 0; transform: translateY(10px) scale(0.5); filter: blur(6px); } 65% { opacity: 1; transform: scale(1.1); filter: blur(0); } 100% { opacity: 1; transform: none; filter: blur(0); } }
+  .lg-item { transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.18s; }
+  .lg-item:active { transform: scale(0.88); background: rgba(255,255,255,0.14); }
+  @media (prefers-reduced-motion: reduce) { .lg-anim, .lg-item { animation: none !important; transition: none !important; } }
+  @keyframes agIn { 0% { opacity: 0; transform: translateY(28px) scale(0.8); filter: blur(10px); } 60% { opacity: 1; transform: translateY(-4px) scale(1.015); filter: blur(0); } 100% { opacity: 1; transform: none; filter: blur(0); } }
+  @media (prefers-reduced-motion: reduce) { .ag-anim { animation: none !important; } }
+  @keyframes pgFade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes pgUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  h1 { animation: pgUp 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) backwards; }
+  section, article, svg:not([width="22"]):not([width="14"]):not([width="16"]):not([width="18"]):not([width="20"]) { animation: pgFade 0.45s ease backwards; }
+  button[style*="border-radius: 16px"], div[style*="background: #1A1A1A"][style*="border-radius: 16px"] { animation: pgUp 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) backwards; }
+  button[style*="border-radius: 16px"]:nth-child(2), div[style*="border-radius: 16px"]:nth-child(2) { animation-delay: 0.03s; }
+  button[style*="border-radius: 16px"]:nth-child(3), div[style*="border-radius: 16px"]:nth-child(3) { animation-delay: 0.06s; }
+  button[style*="border-radius: 16px"]:nth-child(4), div[style*="border-radius: 16px"]:nth-child(4) { animation-delay: 0.09s; }
+  button[style*="border-radius: 16px"]:nth-child(n+5), div[style*="border-radius: 16px"]:nth-child(n+5) { animation-delay: 0.12s; }
+  button:not(.lg-scrim), a { transition: transform 0.16s ease, opacity 0.16s ease, background-color 0.16s ease, border-color 0.16s ease; }
+  button:not(.lg-scrim):active { transform: scale(0.97); }
+  @media (hover: hover) { button:not(.lg-scrim):hover, a:hover { opacity: 0.88; } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+  .rt-ed { outline: none; word-break: break-word; }
+  .rt-ed:empty::before { content: attr(data-ph); color: #8A8A8A; pointer-events: none; }
+  .rt-ed b, .rt-ed strong { font-weight: 700; color: #F5F5F5; }
+  .rt-ed h1 { margin: 0.4em 0 0.2em; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 28px; line-height: 1.2; color: #F5F5F5; }
+  .rt-ed h2 { margin: 0.4em 0 0.2em; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 22px; line-height: 1.25; color: #F5F5F5; }
+  .rt-ed font[size="2"] { font-size: 13px; }
+  .rt-ed ul { margin: 6px 0; padding-left: 22px; }
+</style>
+</helmet>
+
+<div style="position: relative; width: 390px; height: 844px; box-sizing: border-box; display: flex; flex-direction: column; background: #121212; color: #EDEDED; overflow: hidden;">
+
+  <!-- SCROLL AREA -->
+  
+
+  <!-- QUICK CAPTURE -->
+  <!-- AGENT BUTTON -->
+  <button type="button" aria-label="Open agent (hold to talk)" aria-expanded="{{chatOpen}}" onClick="{{agentClick}}" onPointerDown="{{agentDown}}" onPointerUp="{{agentUp}}" onPointerCancel="{{agentUp}}" onContextMenu="{{noMenu}}" style="position: absolute; left: 50%; margin-left: -26px; bottom: 22px; width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #000000; border: 1.5px solid {{agentRing}}; cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none; box-shadow: 0 6px 18px rgba(0,0,0,0.6); z-index: 30;"><span style="width: 12px; height: 12px; border-radius: 50%; background: #F5F5F5;"></span></button>
+
+  <sc-if value="{{chatOpen}}" hint-placeholder-val="{{ false }}">
+  <section aria-label="Agent" class="ag-anim" style="transform-origin: 50% 100%; animation: agIn 0.5s cubic-bezier(0.34, 1.4, 0.64, 1) backwards; position: absolute; left: 12px; right: 12px; top: 56px; bottom: 96px; display: flex; flex-direction: column; box-sizing: border-box; border-radius: 20px; background: #1A1A1A; border: 1px solid #2E2E2E; box-shadow: 0 16px 48px rgba(0,0,0,0.6); z-index: 25; overflow: hidden;">
+    <div style="display: flex; align-items: center; justify-content: space-between; padding: 6px 8px 6px 16px; border-bottom: 1px solid #262626;">
+      <span style="display: flex; align-items: center; gap: 10px; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 15px; color: #F5F5F5;"><span style="width: 8px; height: 8px; border-radius: 50%; background: #F5F5F5;"></span>Agent</span>
+      <button type="button" onClick="{{closeChat}}" aria-label="Close agent" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: none; border: 0; cursor: pointer; color: #B5B5B5;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
+    </div>
+    <div style="flex: 1; min-height: 0; overflow-y: auto; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;">
+      <sc-if value="{{noMsgs}}" hint-placeholder-val="{{ true }}">
+        <div style="margin: auto 0; display: flex; flex-direction: column; gap: 12px;">
+          <p style="font-size: 14px; line-height: 1.5; color: #A8A8A8;">Ask Claude about your day, tasks and habits. It can't read your vault yet.</p>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <sc-for list="{{prompts}}" as="q" hint-placeholder-count="3">
+              <button type="button" onClick="{{q.pick}}" style="min-height: 36px; padding: 0 14px; border-radius: 999px; background: #222222; border: 1px solid #333; cursor: pointer; font-size: 13px; color: #D0D0D0;">{{q.text}}</button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+      <sc-for list="{{msgs}}" as="m" hint-placeholder-count="2">
+        <div style="align-self: {{m.align}}; max-width: 85%; padding: 9px 13px; border-radius: 14px; font-size: 14px; line-height: 1.45; background: {{m.bg}}; color: {{m.fg}};">{{m.text}}</div>
+      </sc-for>
+    </div>
+    <sc-if value="{{voiceNote}}" hint-placeholder-val="{{ false }}">
+      <p style="padding: 0 16px 8px; font-size: 12.5px; color: #B5B5B5;">{{voiceNote}}</p>
+    </sc-if>
+    <div style="display: flex; align-items: center; gap: 8px; padding: 10px 12px 12px; border-top: 1px solid #262626;">
+      <input type="text" aria-label="Message the agent" placeholder="{{placeholder}}" value="{{draft}}" onInput="{{onDraft}}" onKeyDown="{{onDraftKey}}" style="flex: 1; min-width: 0; height: 44px; box-sizing: border-box; padding: 0 14px; border-radius: 12px; background: #222222; border: 1px solid #333; color: #F5F5F5; font-size: 14px;">
+      <button type="button" onClick="{{toggleMic}}" aria-label="Voice input" aria-pressed="{{listening}}" style="width: 44px; height: 44px; flex: 0 0 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: {{micBg}}; border: 1px solid #333; color: {{micFg}};"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"></rect><path d="M5 11a7 7 0 0 0 14 0M12 18v3"></path></svg></button>
+      <button type="button" onClick="{{sendMsg}}" aria-label="Send" style="width: 44px; height: 44px; flex: 0 0 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: #EDEDED; border: 0; color: #121212;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"></path></svg></button>
+    </div>
+  </section>
+  </sc-if>
+
+  <!-- BOTTOM TABS -->
+  <sc-if value="{{fabShow}}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{fabAction}}" aria-label="{{fabLabel}}" aria-expanded="{{fabOpen}}" style="position: absolute; right: 16px; bottom: 96px; width: 52px; height: 52px; border: 1px solid #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; background: #222222; color: #D8D8D8; box-shadow: 0 6px 18px rgba(0,0,0,0.6); z-index: {{fabZ}};"><svg style="transform: rotate({{fabRot}}); transition: transform 0.15s;" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg></button></sc-if>
+  <sc-if value="{{perf.open}}" hint-placeholder-val="{{ false }}"><div style="position: absolute; inset: 0; z-index: 44;"><button type="button" onClick="{{perf.form.cancel}}" aria-label="Close" class="lg-anim" style="position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; background: rgba(0,0,0,0.35); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); cursor: default; animation: lgFade 0.22s ease-out backwards;"></button><div id="pcomp" role="dialog" aria-label="New review" class="lg-anim" style="position: absolute; z-index: 45; left: 12px; right: 12px; top: 56px; max-height: calc(100% - 190px); overflow-y: auto; box-sizing: border-box; padding: 14px; border-radius: 28px; display: flex; flex-direction: column; gap: 14px; background: rgba(46,46,46,0.55); -webkit-backdrop-filter: blur(24px) saturate(170%); backdrop-filter: blur(24px) saturate(170%); border: 1px solid rgba(255,255,255,0.14); box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), inset 0 -1px 0 rgba(255,255,255,0.05), 0 16px 40px rgba(0,0,0,0.5); transform-origin: 85% 100%; animation: lgIn 0.46s cubic-bezier(0.34, 1.4, 0.64, 1) backwards;"><div style="display: flex; flex-direction: column; gap: 6px;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: #8A8A8A;">TYPE</span><div style="display: flex; flex-wrap: wrap; gap: 8px;"><sc-for list="{{perf.form.types}}" as="t" hint-placeholder-count="3"><button type="button" onClick="{{t.pick}}" aria-pressed="{{t.on}}" style="min-height: 44px; padding: 0 16px; border-radius: 999px; cursor: pointer; font-size: 13.5px; background: {{t.bg}}; color: {{t.fg}}; border: 1px solid {{t.bd}};">{{t.label}}</button></sc-for></div></div><div style="display: flex; flex-direction: column; gap: 6px;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: #8A8A8A;">DATE</span><input type="date" aria-label="Review date" value="{{perf.form.date}}" onInput="{{perf.form.onDate}}" style="height: 44px; box-sizing: border-box; width: 100%; padding: 0 12px; border-radius: 12px; background: #222222; border: 1px solid #333; color: #F5F5F5; font-size: 14px;"></div><div style="display: flex; flex-direction: column; gap: 6px;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: #8A8A8A;">SCORECARD</span><input type="text" aria-label="Projects moved" placeholder="Projects moved" value="{{perf.form.projects}}" onInput="{{perf.form.onProjects}}" style="height: 44px; box-sizing: border-box; width: 100%; padding: 0 12px; border-radius: 12px; background: #222222; border: 1px solid #333; color: #F5F5F5; font-size: 14px;"><input type="text" aria-label="Quick wins completed" placeholder="Quick wins completed" value="{{perf.form.wins}}" onInput="{{perf.form.onWins}}" style="height: 44px; box-sizing: border-box; width: 100%; padding: 0 12px; border-radius: 12px; background: #222222; border: 1px solid #333; color: #F5F5F5; font-size: 14px;"><input type="text" aria-label="Biggest blocker" placeholder="Biggest blocker" value="{{perf.form.blocker}}" onInput="{{perf.form.onBlocker}}" style="height: 44px; box-sizing: border-box; width: 100%; padding: 0 12px; border-radius: 12px; background: #222222; border: 1px solid #333; color: #F5F5F5; font-size: 14px;"></div><div style="display: flex; flex-direction: column; gap: 10px;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: #8A8A8A;">PILLAR CHECK-IN (1 OFF TRACK, 5 ON TRACK)</span><sc-for list="{{perf.form.pillars}}" as="p" hint-placeholder-count="5"><div style="display: flex; flex-direction: column; gap: 8px; padding-bottom: 6px;"><div style="display: flex; align-items: baseline; justify-content: space-between; gap: 8px;"><span style="font-size: 14px; font-weight: 500; color: #E6E6E6;">{{p.name}}</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8A8A8A;">{{p.scoreText}}</span></div><div style="display: flex; gap: 6px;"><sc-for list="{{p.opts}}" as="o" hint-placeholder-count="5"><button type="button" onClick="{{o.pick}}" aria-pressed="{{o.on}}" style="flex: 1; min-width: 44px; height: 44px; padding: 0; border-radius: 12px; cursor: pointer; font-size: 14px; font-weight: 500; background: {{o.bg}}; color: {{o.fg}}; border: 1px solid {{o.bd}};">{{o.label}}</button></sc-for></div><input type="text" aria-label="Pillar notes" placeholder="Notes" value="{{p.notes}}" onInput="{{p.onNotes}}" style="height: 44px; box-sizing: border-box; width: 100%; padding: 0 12px; border-radius: 12px; background: #222222; border: 1px solid #333; color: #F5F5F5; font-size: 14px;"></div></sc-for></div><div style="display: flex; flex-direction: column; gap: 6px;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: #8A8A8A;">NEXT FOCUS</span><sc-for list="{{perf.form.focus}}" as="f" hint-placeholder-count="3"><input type="text" aria-label="Next focus" placeholder="Focus" value="{{f.value}}" onInput="{{f.on}}" style="height: 44px; box-sizing: border-box; width: 100%; padding: 0 12px; border-radius: 12px; background: #222222; border: 1px solid #333; color: #F5F5F5; font-size: 14px;"></sc-for></div><div style="display: flex; flex-direction: column; gap: 6px;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: #8A8A8A;">OBSERVATIONS</span><textarea aria-label="Observations" placeholder="What patterns am I noticing? Where am I drifting?" value="{{perf.form.obs}}" onInput="{{perf.form.onObs}}" style="min-height: 96px; box-sizing: border-box; width: 100%; padding: 10px 12px; border-radius: 12px; background: #222222; border: 1px solid #333; color: #F5F5F5; font-size: 14px; line-height: 1.45; resize: vertical; font-family: inherit;"></textarea></div><sc-if value="{{perf.form.hasErr}}" hint-placeholder-val="{{ false }}"><p style="margin: 0; font-size: 13px; color: #E0A0A0;">{{perf.form.err}}</p></sc-if><div style="display: flex; justify-content: flex-end; align-items: center; gap: 6px;"><button type="button" onClick="{{perf.form.cancel}}" style="height: 44px; padding: 0 14px; background: none; border: 0; cursor: pointer; font-size: 13.5px; color: #B5B5B5;">Cancel</button><button type="button" onClick="{{perf.form.submit}}" style="height: 44px; padding: 0 18px; border: 0; border-radius: 12px; cursor: pointer; font-size: 13.5px; font-weight: 600; background: #EDEDED; color: #121212;">Save review</button></div></div></div></sc-if>
+  <sc-if value="{{navOpen}}" hint-placeholder-val="{{ false }}"><div style="position: absolute; inset: 0; z-index: 60;"><button type="button" onClick="{{closeNav}}" aria-label="Close menu" class="lg-anim" style="position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; background: rgba(0,0,0,0.35); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); cursor: default; animation: lgFade 0.22s ease-out backwards;"></button><nav aria-label="{{navTitle}}" class="lg-anim" style="position: absolute; z-index: 41; left: 16px; right: 16px; bottom: 92px; height: 64px; box-sizing: border-box; padding: 0 8px; border-radius: 32px; display: flex; align-items: center; justify-content: space-around; background: rgba(46,46,46,0.55); -webkit-backdrop-filter: blur(24px) saturate(170%); backdrop-filter: blur(24px) saturate(170%); border: 1px solid rgba(255,255,255,0.14); box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), inset 0 -1px 0 rgba(255,255,255,0.05), 0 16px 40px rgba(0,0,0,0.5); transform-origin: 50% 100%; animation: lgIn 0.46s cubic-bezier(0.34, 1.4, 0.64, 1) backwards;"><sc-for list="{{navItems}}" as="n" hint-placeholder-count="5"><a href="{{n.href}}" onClick="{{n.close}}" aria-label="{{n.t}}" class="lg-item" style="flex: 1 0 44px; min-width: 44px; height: 48px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border-radius: 24px; color: {{n.color}}; animation: lgItem 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) {{n.delay}} backwards;"><sc-if value="{{n.iTasks}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 11 3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg></sc-if><sc-if value="{{n.iCalendar}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><path d="M8 14h.01"></path><path d="M12 14h.01"></path><path d="M16 14h.01"></path><path d="M8 18h.01"></path><path d="M12 18h.01"></path></svg></sc-if><sc-if value="{{n.iProjects}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2Z"></path></svg></sc-if><sc-if value="{{n.iHealth}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg></sc-if><sc-if value="{{n.iMMA}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11V8.3a2.3 2.3 0 0 1 4.6 0V10"></path><path d="M13.6 9.8a2.3 2.3 0 0 1 4.4.9V15a5.5 5.5 0 0 1-5.5 5.5h-1A5.5 5.5 0 0 1 6 15v-2.7c0-1.1.9-1.8 1.8-1.8H9"></path><rect x="7.5" y="16" width="9" height="4.2" rx="1.6"></rect></svg></sc-if><sc-if value="{{n.iSpiritual}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20"></path><path d="M6 8h12"></path></svg></sc-if><sc-if value="{{n.iWork}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg></sc-if><sc-if value="{{n.iFinances}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg></sc-if><sc-if value="{{n.iJournal}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20 M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"></path></svg></sc-if><sc-if value="{{n.iCollege}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 10-10-5-10 5 10 5 10-5Z M6 12v5c3 3 9 3 12 0v-5"></path></svg></sc-if><sc-if value="{{n.iLanguages}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6 M4 14l6-6 2-3 M2 5h12 M7 2h1 m22 22-5-10-5 10 M14 18h6"></path></svg></sc-if><sc-if value="{{n.iSelfStudy}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5 M9 18h6 M10 22h4"></path></svg></sc-if><sc-if value="{{n.iResources}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2Z"></path></svg></sc-if><sc-if value="{{n.iPeople}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8 M22 21v-2a4 4 0 0 0-3-3.9 M16 3.1a4 4 0 0 1 0 7.8"></path></svg></sc-if><sc-if value="{{n.iPlaces}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z M12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6"></path></svg></sc-if></a></sc-for></nav></div></sc-if>
+  <nav aria-label="Main" style="position: absolute; z-index: 25; left: 16px; right: 16px; bottom: 16px; height: 64px; box-sizing: border-box; padding: 0 14px; border-radius: 32px; display: flex; align-items: center; justify-content: space-around; background: #1E1E1E; border: 1px solid #2E2E2E; box-shadow: 0 10px 28px rgba(0,0,0,0.55);">
+    <a href="Phone.dc.html" aria-label="Home" onPointerDown="{{navDownHome}}" onPointerUp="{{navUp}}" onPointerCancel="{{navUp}}" onContextMenu="{{noMenu}}" onClick="{{navClick}}" style="width: 56px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center; background: transparent; color: #9A9A9A;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-7 9 7"></path><path d="M5 10v10a1 1 0 0 0 1 1h3v-6h6v6h3a1 1 0 0 0 1-1V10"></path></svg></a>
+    <a href="AreasPhone.dc.html" aria-label="Areas" onPointerDown="{{navDownAreas}}" onPointerUp="{{navUp}}" onPointerCancel="{{navUp}}" onContextMenu="{{noMenu}}" onClick="{{navClick}}" style="width: 56px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center; background: transparent; color: #9A9A9A;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg></a>
+    <span aria-hidden="true" style="width: 60px; flex: 0 0 60px;"></span>
+    <a href="KnowledgePhone.dc.html" aria-label="Knowledge" onPointerDown="{{navDownKnowledge}}" onPointerUp="{{navUp}}" onPointerCancel="{{navUp}}" onContextMenu="{{noMenu}}" onClick="{{navClick}}" style="width: 56px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center; background: transparent; color: #9A9A9A;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"></path></svg></a>
+    <a href="PerformancePhone.dc.html" aria-label="Performance" aria-current="page" style="width: 56px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center; background: #2C2C2C; color: #F5F5F5;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line><line x1="6" y1="20" x2="6" y2="16"></line></svg></a>
+  </nav>
+  <div style="flex: 1; min-height: 0; overflow-y: auto; box-sizing: border-box; padding: 18px 16px 96px; display: flex; flex-direction: column; gap: 14px;">
+      <div><h1 style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 34px; line-height: 1.05; letter-spacing: -0.02em; color: #F5F5F5; margin: 6px 0 0;">Performance</h1><p style="margin: 8px 0 0; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: #8A8A8A;"><br></p></div>
+      <div style="display: flex; flex-wrap: wrap; gap: 6px;"><sc-for list="{{perf.filters}}" as="f" hint-placeholder-count="4"><button type="button" onClick="{{f.pick}}" aria-pressed="{{f.on}}" style="min-height: 44px; padding: 0 16px; border-radius: 999px; cursor: pointer; font-size: 13.5px; background: {{f.bg}}; color: {{f.fg}}; border: 1px solid {{f.bd}};">{{f.label}}</button></sc-for></div><sc-if value="{{perf.per.show}}" hint-placeholder-val="{{ false }}"><div style="display: flex; align-items: center; gap: 4px;"><button type="button" onClick="{{perf.per.prev}}" aria-label="Previous period" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 12px; background: #222222; border: 1px solid #333; cursor: pointer; color: #D0D0D0; opacity: {{perf.per.prevOp}};"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></button><div style="min-width: 150px; display: flex; flex-direction: column; align-items: center; gap: 1px;"><span style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 16px; color: #F5F5F5;">{{perf.per.label}}</span><sc-if value="{{perf.per.hasSub}}" hint-placeholder-val="{{ false }}"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.08em; color: #8A8A8A;">{{perf.per.sub}}</span></sc-if></div><button type="button" onClick="{{perf.per.next}}" aria-label="Next period" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 12px; background: #222222; border: 1px solid #333; cursor: pointer; color: #D0D0D0; opacity: {{perf.per.nextOp}};"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button></div></sc-if><sc-if value="{{perf.noData}}" hint-placeholder-val="{{ true }}"><p style="margin: 0; font-size: 13.5px; color: #8A8A8A;">{{perf.chartEmpty}}</p></sc-if><div style="display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px;"><section style="box-sizing: border-box; padding: 16px; border-radius: 16px; background: #1A1A1A; border: 1px solid #292929; display: flex; flex-direction: column; gap: 12px; min-width: 0;"><h2 style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 18px; color: #F5F5F5; margin: 0;">Overall</h2><div style="position: relative; width: 132px; height: 132px; align-self: center;"><svg width="132" height="132" viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="48" fill="none" stroke="#2A2A2A" stroke-width="8"></circle><circle cx="60" cy="60" r="48" fill="none" stroke="#EDEDED" stroke-width="8" stroke-dasharray="{{perf.overall.ring}}" transform="rotate(-90 60 60)"></circle></svg><div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;"><span style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 34px; line-height: 1; color: #F5F5F5;">{{perf.overall.text}}</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8A8A8A;">OUT OF 5</span></div></div><div style="display: flex; flex-direction: column; align-items: center; gap: 2px;"><span style="font-size: 13.5px; color: #D0D0D0;">{{perf.overall.delta}}</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8A8A8A;">{{perf.overall.when}}</span></div></section><section style="box-sizing: border-box; padding: 16px; border-radius: 16px; background: #1A1A1A; border: 1px solid #292929; display: flex; flex-direction: column; gap: 12px; min-width: 0;"><h2 style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 18px; color: #F5F5F5; margin: 0;">Pillar Balance</h2><div style="position: relative; width: 100%; max-width: 280px; align-self: center; aspect-ratio: 1 / 1;"><svg viewBox="0 0 240 240" width="100%" height="100%" role="img" aria-label="Radar of the five pillars, latest scores" style="display: block;"><path d="{{perf.radar.grid}}" fill="none" stroke="#2E2E2E" stroke-width="1"></path><path d="{{perf.radar.axes}}" fill="none" stroke="#2A2A2A" stroke-width="1"></path><path d="{{perf.radar.prev}}" fill="none" stroke="#7A7A7A" stroke-width="1.5" stroke-dasharray="4 4"></path><path d="{{perf.radar.now}}" fill="rgba(237,237,237,0.14)" stroke="#EDEDED" stroke-width="2" stroke-linejoin="round"></path></svg><sc-for list="{{perf.radar.labels}}" as="l" hint-placeholder-count="5"><div style="position: absolute; left: {{l.left}}; top: {{l.top}}; transform: translate(-50%, -50%); text-align: center; pointer-events: none;"><div style="font-size: 12.5px; color: #D0D0D0;">{{l.name}}</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #8A8A8A;">{{l.val}}</div></div></sc-for><sc-for list="{{perf.radar.pts}}" as="q" hint-placeholder-count="5"><div title="{{q.tip}}" style="position: absolute; left: {{q.left}}; top: {{q.top}}; width: 24px; height: 24px; margin: -12px 0 0 -12px; display: flex; align-items: center; justify-content: center;"><span style="width: 8px; height: 8px; border-radius: 50%; background: #EDEDED; box-shadow: 0 0 0 2px #1A1A1A;"></span></div></sc-for></div><div style="display: flex; justify-content: center; gap: 16px; font-size: 12.5px; color: #B5B5B5;"><span style="display: inline-flex; align-items: center; gap: 6px;"><span style="width: 16px; height: 2px; background: #EDEDED;"></span>Latest</span><span style="display: inline-flex; align-items: center; gap: 6px;"><span style="width: 16px; height: 0; border-top: 2px dashed #7A7A7A;"></span>Before that</span></div></section><div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; align-content: start;"><section style="box-sizing: border-box; padding: 16px; border-radius: 16px; background: #1A1A1A; border: 1px solid #292929; display: flex; flex-direction: column; gap: 12px; min-width: 0;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: #8A8A8A;">REVIEWS</span><span style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 30px; line-height: 1; color: #F5F5F5;">{{perf.nReviews}}</span></section><section style="box-sizing: border-box; padding: 16px; border-radius: 16px; background: #1A1A1A; border: 1px solid #292929; display: flex; flex-direction: column; gap: 12px; min-width: 0;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: #8A8A8A;">WEEKLY STREAK</span><div style="display: flex; align-items: baseline; gap: 8px;"><span style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 30px; line-height: 1; color: #F5F5F5;">{{perf.streak}}</span><span style="font-size: 13px; color: #8A8A8A;">{{perf.streakNote}}</span></div></section><section style="box-sizing: border-box; padding: 16px; border-radius: 16px; background: #1A1A1A; border: 1px solid #292929; display: flex; flex-direction: column; gap: 12px; min-width: 0;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: #8A8A8A;">LATEST BLOCKER</span><span style="font-size: 14.5px; color: #E6E6E6; word-break: break-word;">{{perf.blocker}}</span></section></div></div><section style="box-sizing: border-box; padding: 16px; border-radius: 16px; background: #1A1A1A; border: 1px solid #292929; display: flex; flex-direction: column; gap: 12px; min-width: 0;"><h2 style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 18px; color: #F5F5F5; margin: 0;">Overall trend</h2><p style="margin: 0; font-size: 12.5px; color: #8A8A8A;">Average of the pillars you scored in each review, 1 to 5.</p><div style="display: flex; gap: 8px;"><div style="display: flex; flex-direction: column; justify-content: space-between; height: 180px; padding: 8px 0; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #8A8A8A;"><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span></div><div style="flex: 1; min-width: 0;"><div style="position: relative; height: 180px;"><svg viewBox="0 0 600 180" preserveAspectRatio="none" width="100%" height="100%" role="img" aria-label="Average review score over time" style="display: block;"><path d="{{perf.trend.grid}}" fill="none" stroke="#262626" stroke-width="1" vector-effect="non-scaling-stroke"></path><path d="{{perf.trend.area}}" fill="rgba(237,237,237,0.08)"></path><path d="{{perf.trend.line}}" fill="none" stroke="#EDEDED" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"></path></svg><sc-for list="{{perf.trend.pts}}" as="q" hint-placeholder-count="6"><div title="{{q.tip}}" style="position: absolute; left: {{q.left}}; top: {{q.top}}; width: 24px; height: 24px; margin: -12px 0 0 -12px; display: flex; align-items: center; justify-content: center;"><span style="width: 8px; height: 8px; border-radius: 50%; background: #EDEDED; box-shadow: 0 0 0 2px #1A1A1A;"></span></div></sc-for></div><div style="display: flex; justify-content: space-between; margin-top: 6px; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #8A8A8A;"><span>{{perf.trend.first}}</span><span>{{perf.trend.last}}</span></div></div></div></section><div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;"><sc-for list="{{perf.cards}}" as="c" hint-placeholder-count="5"><section style="box-sizing: border-box; padding: 16px; border-radius: 16px; background: #1A1A1A; border: 1px solid #292929; display: flex; flex-direction: column; gap: 6px; min-width: 0; padding: 14px;"><span style="font-size: 14px; color: #D0D0D0;">{{c.name}}</span><span style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 26px; line-height: 1.1; color: #F5F5F5;">{{c.score}}</span><span style="font-size: 12.5px; color: #8A8A8A;">{{c.status}}</span><div style="position: relative; height: 32px; margin-top: 4px;"><svg viewBox="0 0 100 32" preserveAspectRatio="none" width="100%" height="100%" aria-hidden="true" style="display: block;"><path d="{{c.path}}" fill="none" stroke="#B5B5B5" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"></path></svg><sc-if value="{{c.hasDot}}" hint-placeholder-val="{{ true }}"><span style="position: absolute; left: {{c.dotLeft}}; top: {{c.dotTop}}; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: #EDEDED; box-shadow: 0 0 0 2px #1A1A1A;"></span></sc-if></div><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8A8A8A; min-height: 14px;">{{c.delta}}</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.04em; color: #8A8A8A; border-top: 1px solid #292929; padding-top: 6px; margin-top: 2px;">{{c.hab}}</span></section></sc-for></div><section style="box-sizing: border-box; padding: 16px; border-radius: 16px; background: #1A1A1A; border: 1px solid #292929; display: flex; flex-direction: column; gap: 12px; min-width: 0;"><div style="display: flex; align-items: baseline; justify-content: space-between; gap: 8px; flex-wrap: wrap;"><h2 style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 18px; color: #F5F5F5; margin: 0;">Habits</h2><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.06em; color: #8A8A8A;">{{perf.hab.range}} · {{perf.hab.overall}}</span></div><sc-if value="{{perf.hab.noAny}}" hint-placeholder-val="{{ true }}"><p style="margin: 0; font-size: 13.5px; color: #8A8A8A;">No habits ticked in this range yet. Tick them on Home.</p></sc-if><div style="display: flex; flex-direction: column; gap: 6px;"><div style="display: flex; align-items: center; gap: 8px;"><span style="flex: 0 0 96px;"></span><div style="flex: 1; min-width: 0; display: flex; gap: 2px;"><sc-for list="{{perf.hab.cols}}" as="c" hint-placeholder-count="28"><span style="flex: 1; min-width: 0; text-align: center; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: #8A8A8A; white-space: nowrap; overflow: visible;">{{c.t}}</span></sc-for></div><span style="flex: 0 0 40px;"></span></div><sc-for list="{{perf.hab.rows}}" as="r" hint-placeholder-count="5"><div style="display: flex; align-items: center; gap: 8px;"><div style="flex: 0 0 96px; display: flex; flex-direction: column; min-width: 0;"><span style="font-size: 13px; color: #D0D0D0;">{{r.name}}</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.08em; color: #8A8A8A;">{{r.pillar}}</span></div><div style="flex: 1; min-width: 0; display: flex; gap: 2px;"><sc-for list="{{r.cells}}" as="c" hint-placeholder-count="28"><div title="{{c.tip}}" style="flex: 1; min-width: 0; height: 24px; box-sizing: border-box; border-radius: 3px; background: {{c.bg}}; border: 1px solid {{c.bd}};"></div></sc-for></div><span title="{{r.tip}}" style="flex: 0 0 40px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #D0D0D0;">{{r.pctText}}</span></div></sc-for></div></section><section style="box-sizing: border-box; padding: 16px; border-radius: 16px; background: #1A1A1A; border: 1px solid #292929; display: flex; flex-direction: column; gap: 12px; min-width: 0;"><h2 style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 18px; color: #F5F5F5; margin: 0;">Check-in map</h2><p style="margin: 0; font-size: 12.5px; color: #8A8A8A;">Each square is one pillar in one review. Lighter is closer to on track.</p><div style="display: flex; flex-direction: column; gap: 4px;"><div style="display: flex; align-items: center; gap: 4px;"><span style="flex: 0 0 56px;"></span><sc-for list="{{perf.heat.cols}}" as="c" hint-placeholder-count="12"><span style="flex: 1; min-width: 0; text-align: center; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: #8A8A8A; white-space: nowrap; overflow: hidden;">{{c.t}}</span></sc-for></div><sc-for list="{{perf.heat.rows}}" as="r" hint-placeholder-count="5"><div style="display: flex; align-items: center; gap: 4px;"><span style="flex: 0 0 56px; font-size: 13px; color: #D0D0D0;">{{r.name}}</span><sc-for list="{{r.cells}}" as="c" hint-placeholder-count="12"><div title="{{c.tip}}" style="flex: 1; min-width: 0; height: 32px; box-sizing: border-box; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 11px; background: {{c.bg}}; color: {{c.fg}}; border: 1px solid {{c.bd}};">{{c.txt}}</div></sc-for></div></sc-for></div><div style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #8A8A8A;"><span>1</span><sc-for list="{{perf.heat.legend}}" as="g" hint-placeholder-count="5"><span style="width: 22px; height: 16px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 10px; background: {{g.bg}}; color: {{g.fg}};">{{g.t}}</span></sc-for><span>5</span></div></section>
+      <section style="display: flex; flex-direction: column; gap: 12px;"><h2 style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 18px; color: #F5F5F5; margin: 0;">Reviews</h2><sc-if value="{{perf.noList}}" hint-placeholder-val="{{ true }}"><p style="margin: 0; font-size: 14px; color: #8A8A8A;">{{perf.emptyText}}</p></sc-if><sc-for list="{{perf.list}}" as="r" hint-placeholder-count="2"><article style="box-sizing: border-box; padding: 16px; border-radius: 16px; background: #1A1A1A; border: 1px solid #292929; display: flex; flex-direction: column; gap: 12px;"><div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.08em; color: #B5B5B5;">{{r.head}}</span><button type="button" onClick="{{r.del}}" aria-label="Delete review" style="width: 44px; height: 44px; margin: -8px -10px -8px 0; display: flex; align-items: center; justify-content: center; background: none; border: 0; cursor: pointer; color: #8A8A8A;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"></path></svg></button></div><sc-if value="{{r.hasChips}}" hint-placeholder-val="{{ false }}"><div style="display: flex; flex-wrap: wrap; gap: 6px;"><sc-for list="{{r.chips}}" as="c" hint-placeholder-count="5"><span style="padding: 4px 10px; border-radius: 999px; font-size: 12.5px; color: #C8C8C8; border: 1px solid #3A3A3A;">{{c.text}}</span></sc-for></div></sc-if><sc-if value="{{r.hasFacts}}" hint-placeholder-val="{{ false }}"><div style="display: flex; flex-direction: column; gap: 8px;"><sc-for list="{{r.facts}}" as="x" hint-placeholder-count="3"><div style="display: flex; flex-direction: column; gap: 2px;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.08em; color: #8A8A8A;">{{x.k}}</span><span style="font-size: 14px; color: #E6E6E6; word-break: break-word;">{{x.v}}</span></div></sc-for></div></sc-if><sc-if value="{{r.hasFocus}}" hint-placeholder-val="{{ false }}"><div style="display: flex; flex-direction: column; gap: 4px;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.08em; color: #8A8A8A;">NEXT FOCUS</span><sc-for list="{{r.focus}}" as="x" hint-placeholder-count="3"><span style="font-size: 14px; color: #E6E6E6;">{{x.line}}</span></sc-for></div></sc-if><sc-if value="{{r.hasObs}}" hint-placeholder-val="{{ false }}"><div style="display: flex; flex-direction: column; gap: 2px;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.08em; color: #8A8A8A;">OBSERVATIONS</span><span style="font-size: 14px; line-height: 1.5; color: #E6E6E6; white-space: pre-wrap; word-break: break-word;">{{r.obs}}</span></div></sc-if></article></sc-for></section>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"hour12":{"editor":"boolean","default":true},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  componentDidMount() {
+    try { const ld = () => { try { const v = JSON.parse(localStorage.getItem('lifeos.hdone') || 'null'); if (v && typeof v === 'object') this.setState({ hdone: v }); } catch (e) {} }; ld(); this._hst = (e) => { if (!e || e.key === 'lifeos.hdone') ld(); }; window.addEventListener('storage', this._hst); } catch (e) {}
+    // island: slide the active pill from the previous section to this one
+    try {
+      const go = () => {
+        const nav = document.querySelector('nav[aria-label="Main"]');
+        const cur = nav && nav.querySelector('a[aria-current]');
+        if (!cur || !cur.animate) return;
+        const name = cur.getAttribute('aria-label');
+        let prev = '';
+        try { prev = window.sessionStorage.getItem('lifeos-island') || ''; window.sessionStorage.setItem('lifeos-island', name); } catch (e) {}
+        const old = prev && prev !== name ? nav.querySelector('a[aria-label="' + prev + '"]') : null;
+        const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reduce) return;
+        const ease = 'cubic-bezier(0.34, 1.56, 0.64, 1)';
+        if (old) {
+          const a = old.getBoundingClientRect(), b = cur.getBoundingClientRect();
+          const dx = (a.left + a.width / 2) - (b.left + b.width / 2);
+          cur.animate([
+            { transform: 'translateX(' + dx + 'px) scale(1, 1)' },
+            { transform: 'translateX(' + dx * 0.45 + 'px) scale(1.5, 0.9)', offset: 0.42 },
+            { transform: 'translateX(0) scale(1, 1)' }
+          ], { duration: 620, easing: ease });
+        } else {
+          cur.animate([{ transform: 'scale(0.6)', opacity: 0.4 }, { transform: 'scale(1.1)', opacity: 1, offset: 0.6 }, { transform: 'scale(1)', opacity: 1 }], { duration: 480, easing: ease });
+        }
+      };
+      setTimeout(go, 40);
+    } catch (e) {}
+  }
+  renderVals() {
+    const s = this.state || {};
+
+    // performance — reviews follow the vault's Performance Review template. Session-only until the vault write-back exists.
+    const pad2 = (n) => String(n).padStart(2, '0');
+    const dk = (d) => d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+    const todayStr = dk(new Date());
+    const PILLARS = ['Body', 'Mind', 'Wealth', 'Craft', 'Spirit'];
+    const TYPES = ['Weekly', 'Monthly', 'Yearly'];
+    const stOf = (x) => { const n = Math.round(x); return n >= 4 ? 'On track' : n === 3 ? 'Drifting' : 'Off track'; };
+    const nz = (n) => String(Math.round(n * 10) / 10);
+    const HEAT = ['#333333', '#4F4F4F', '#7C7C7C', '#B0B0B0', '#EDEDED'];
+    const HEATFG = ['#C8C8C8', '#E0E0E0', '#F5F5F5', '#121212', '#121212'];
+    const blank = () => ({ type: 'Weekly', date: todayStr, projects: '', wins: '', blocker: '', sc: {}, pn: {}, f: ['', '', ''], obs: '', err: '' });
+    const reviews = s.pReviews || [];
+    const pOpen = !!s.pOpen;
+    const pf = s.pForm || blank();
+    const curF = () => (this.state || {}).pForm || blank();
+    const setP = (o) => this.setState({ pForm: { ...curF(), ...o, err: '' } });
+    const chip = (on, label, pick) => ({ label, on, pick, bg: on ? '#EDEDED' : '#222222', fg: on ? '#121212' : '#D0D0D0', bd: on ? '#EDEDED' : '#333' });
+    const submit = () => {
+      const st = this.state || {};
+      const f = st.pForm || blank();
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(f.date || '')) { this.setState({ pForm: { ...f, err: 'Pick a date.' } }); return; }
+      const any = f.projects.trim() || f.wins.trim() || f.blocker.trim() || f.obs.trim() || f.f.some((x) => x.trim()) || PILLARS.some((p) => f.sc[p] || (f.pn[p] || '').trim());
+      if (!any) { this.setState({ pForm: { ...f, err: 'Fill in at least one field.' } }); return; }
+      const r = { id: 'r' + Date.now(), type: f.type, date: f.date, projects: f.projects.trim(), wins: f.wins.trim(), blocker: f.blocker.trim(), sc: { ...f.sc }, pn: { ...f.pn }, f: f.f.map((x) => x.trim()), obs: f.obs.trim() };
+      this.setState({ pReviews: [...(st.pReviews || []), r], pForm: blank(), pOpen: false });
+    };
+    const form = {
+      types: TYPES.map((t) => chip(pf.type === t, t, () => setP({ type: t }))),
+      date: pf.date, onDate: (e) => setP({ date: e.target.value }),
+      projects: pf.projects, onProjects: (e) => setP({ projects: e.target.value }),
+      wins: pf.wins, onWins: (e) => setP({ wins: e.target.value }),
+      blocker: pf.blocker, onBlocker: (e) => setP({ blocker: e.target.value }),
+      pillars: PILLARS.map((p) => ({
+        name: p, hasScore: !!pf.sc[p], scoreText: pf.sc[p] ? pf.sc[p] + '/5 · ' + stOf(pf.sc[p]) : '',
+        opts: [1, 2, 3, 4, 5].map((n) => ({ label: String(n), on: pf.sc[p] === n, bg: pf.sc[p] === n ? '#EDEDED' : '#222222', fg: pf.sc[p] === n ? '#121212' : '#D0D0D0', bd: pf.sc[p] === n ? '#EDEDED' : '#333', pick: () => setP({ sc: { ...curF().sc, [p]: curF().sc[p] === n ? 0 : n } }) })),
+        notes: pf.pn[p] || '', onNotes: (e) => setP({ pn: { ...curF().pn, [p]: e.target.value } })
+      })),
+      focus: [0, 1, 2].map((i) => ({ n: i + 1, value: pf.f[i] || '', on: (e) => { const a = curF().f.slice(); a[i] = e.target.value; setP({ f: a }); } })),
+      obs: pf.obs, onObs: (e) => setP({ obs: e.target.value }),
+      err: pf.err, hasErr: !!pf.err, submit, cancel: () => this.setState({ pOpen: false })
+    };
+    // ---- charts: computed from saved reviews only ----
+    const flt = s.pFilter || 'All';
+    const wk = (d) => Math.floor((Date.UTC(+d.slice(0, 4), +d.slice(5, 7) - 1, +d.slice(8, 10)) / 86400000 + 3) / 7);
+    const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], MONL = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const pkOf = (d) => (flt === 'Weekly' ? wk(d) : flt === 'Monthly' ? +d.slice(0, 4) * 12 + (+d.slice(5, 7) - 1) : +d.slice(0, 4));
+    const pLabel = (k) => {
+      if (flt === 'Yearly') return String(k);
+      if (flt === 'Monthly') return MONL[k % 12] + ' ' + Math.floor(k / 12);
+      const a = new Date((7 * k - 3) * 86400000), b = new Date((7 * k + 3) * 86400000);
+      return MON[a.getUTCMonth()] + ' ' + a.getUTCDate() + ' – ' + (a.getUTCMonth() === b.getUTCMonth() ? '' : MON[b.getUTCMonth()] + ' ') + b.getUTCDate();
+    };
+    const pShort = (k) => (flt === 'Yearly' ? String(k) : flt === 'Monthly' ? MON[k % 12] : (() => { const a = new Date((7 * k - 3) * 86400000); return pad2(a.getUTCMonth() + 1) + '/' + pad2(a.getUTCDate()); })());
+    const byDate = (a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : a.id < b.id ? -1 : 1);
+    const period = flt !== 'All';
+    const allSorted = reviews.slice().sort(byDate);
+    const keys = period ? allSorted.map((r) => pkOf(r.date)) : [];
+    const curK = period ? pkOf(todayStr) : 0;
+    const minK = keys.length ? Math.min.apply(null, keys) : curK, maxK = keys.length ? Math.max(curK, Math.max.apply(null, keys)) : curK;
+    const pSel = s.pPer || {};
+    let selK = period ? (pSel[flt] != null ? pSel[flt] : (keys.length ? keys[keys.length - 1] : curK)) : 0;
+    if (period) selK = Math.min(maxK, Math.max(minK, selK));
+    const stepPer = (d) => { const nk = selK + d; if (nk < minK || nk > maxK) return; this.setState({ pPer: { ...((this.state || {}).pPer || {}), [flt]: nk } }); };
+    const filters = ['All'].concat(TYPES).map((t) => chip(flt === t, t, () => this.setState({ pFilter: t })));
+    // in a period view each period becomes one point: the average of every review dated inside it
+    let chrono;
+    if (!period) chrono = allSorted;
+    else {
+      const groups = {};
+      allSorted.forEach((r) => { (groups[pkOf(r.date)] = groups[pkOf(r.date)] || []).push(r); });
+      const bk = Object.keys(groups).map(Number).sort((a, b) => a - b).filter((k) => k <= selK);
+      chrono = groups[selK] ? bk.map((k) => {
+        const g = groups[k], sc = {}, pn = {};
+        PILLARS.forEach((p) => { const v = g.map((r) => r.sc[p]).filter(Boolean); if (v.length) sc[p] = Math.round(v.reduce((a, b) => a + b, 0) / v.length * 10) / 10; const n = g.slice().reverse().find((r) => r.pn[p]); if (n) pn[p] = n.pn[p]; });
+        return { id: 'b' + k, type: flt === 'Weekly' ? 'Week' : flt === 'Monthly' ? 'Month' : 'Year', date: g[g.length - 1].date, lab: pShort(k), sc, pn };
+      }) : [];
+    }
+    const mean = (r) => { const v = PILLARS.map((p) => r.sc[p]).filter(Boolean); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : 0; };
+    const f1 = (n) => (Math.round(n * 10) / 10).toFixed(1);
+    const md = (k) => k.slice(5, 7) + '/' + k.slice(8, 10);
+    const lbl = (r) => r.lab || md(r.date);
+    const scored = chrono.filter((r) => mean(r) > 0);
+    const WCAP = 8;
+    // overall ring
+    const latestM = scored.length ? mean(scored[scored.length - 1]) : 0;
+    const prevM = scored.length > 1 ? mean(scored[scored.length - 2]) : 0;
+    const C = 2 * Math.PI * 48;
+    const dlt = scored.length > 1 ? latestM - prevM : 0;
+    const overall = {
+      text: scored.length ? f1(latestM) : '—', hasScore: scored.length > 0,
+      ring: (C * (latestM / 5)).toFixed(1) + ' ' + C.toFixed(1),
+      delta: scored.length > 1 ? (dlt > 0.049 ? '▲ ' + f1(dlt) : dlt < -0.049 ? '▼ ' + f1(-dlt) : '● no change') + (period ? ' vs the ' + flt.toLowerCase().replace('ly', '') + ' before' : ' vs the review before') : scored.length ? 'First scored review' : 'No scores yet',
+      when: scored.length ? scored[scored.length - 1].type + ' · ' + lbl(scored[scored.length - 1]) : ''
+    };
+    // per-pillar series
+    const series = {};
+    PILLARS.forEach((p) => { series[p] = chrono.filter((r) => r.sc[p]).map((r) => ({ d: r.date, v: r.sc[p], note: r.pn[p] || '' })); });
+    const lastOf = (p, k) => { const a = series[p]; return a.length > k ? a[a.length - 1 - k] : null; };
+    // radar
+    const RC = 120, RR = 78;
+    const pt = (i, frac) => { const a = (-90 + i * 72) * Math.PI / 180; return [RC + RR * frac * Math.cos(a), RC + RR * frac * Math.sin(a)]; };
+    const poly = (fr) => fr.map((f, i) => { const q = pt(i, f); return (i ? 'L' : 'M') + q[0].toFixed(1) + ' ' + q[1].toFixed(1); }).join(' ') + ' Z';
+    const nowF = PILLARS.map((p) => { const a = lastOf(p, 0); return a ? a.v / 5 : 0; });
+    const prevF = PILLARS.map((p) => { const a = lastOf(p, 1); return a ? a.v / 5 : 0; });
+    const hasPrev = PILLARS.some((p) => lastOf(p, 1));
+    const radar = {
+      grid: [1, 2, 3, 4, 5].map((k) => poly(PILLARS.map(() => k / 5))).join(' '),
+      axes: PILLARS.map((p, i) => { const q = pt(i, 1); return 'M' + RC + ' ' + RC + ' L' + q[0].toFixed(1) + ' ' + q[1].toFixed(1); }).join(' '),
+      now: scored.length ? poly(nowF) : '', prev: hasPrev ? poly(prevF) : '', hasNow: scored.length > 0, hasPrev,
+      labels: PILLARS.map((p, i) => { const q = pt(i, 1.26); const a = lastOf(p, 0); return { name: p, val: a ? nz(a.v) + '/5' : '—', left: (q[0] / 240 * 100).toFixed(2) + '%', top: (q[1] / 240 * 100).toFixed(2) + '%' }; }),
+      pts: PILLARS.map((p, i) => { const a = lastOf(p, 0); if (!a) return { show: false, left: '0%', top: '0%', tip: '' }; const q = pt(i, a.v / 5); return { show: true, left: (q[0] / 240 * 100).toFixed(2) + '%', top: (q[1] / 240 * 100).toFixed(2) + '%', tip: p + ': ' + nz(a.v) + '/5 · ' + stOf(a.v) }; }).filter((x) => x.show)
+    };
+    // overall trend (average of the pillars scored in each review)
+    const tr = scored.slice(-24);
+    const TW = 600, TH = 180, TP = 14;
+    const ty = (v) => TP + (1 - (v - 1) / 4) * (TH - 2 * TP);
+    const tx = (i) => (tr.length === 1 ? TW / 2 : 16 + (i / (tr.length - 1)) * (TW - 32));
+    const tpts = tr.map((r, i) => [tx(i), ty(mean(r))]);
+    const trend = {
+      grid: [1, 2, 3, 4, 5].map((v) => 'M0 ' + ty(v).toFixed(1) + ' L' + TW + ' ' + ty(v).toFixed(1)).join(' '),
+      hasLine: tpts.length > 1,
+      line: tpts.map((q, i) => (i ? 'L' : 'M') + q[0].toFixed(1) + ' ' + q[1].toFixed(1)).join(' '),
+      area: tpts.length > 1 ? tpts.map((q, i) => (i ? 'L' : 'M') + q[0].toFixed(1) + ' ' + q[1].toFixed(1)).join(' ') + ' L' + tpts[tpts.length - 1][0].toFixed(1) + ' ' + TH + ' L' + tpts[0][0].toFixed(1) + ' ' + TH + ' Z' : '',
+      pts: tr.map((r, i) => ({ left: (tpts[i][0] / TW * 100).toFixed(2) + '%', top: (tpts[i][1] / TH * 100).toFixed(2) + '%', tip: r.type + ' · ' + r.date + ' · average ' + f1(mean(r)) + '/5' })),
+      first: tr.length ? lbl(tr[0]) : '', last: tr.length ? lbl(tr[tr.length - 1]) : '', hasPts: tr.length > 0
+    };
+    // per-pillar cards with sparklines
+    const cards = PILLARS.map((p) => {
+      const a = series[p].slice(-12), now = lastOf(p, 0), prev = lastOf(p, 1);
+      const SW = 100, SH = 32, sx = (i) => (a.length === 1 ? SW / 2 : 3 + (i / (a.length - 1)) * (SW - 6)), sy = (v) => 3 + (1 - (v - 1) / 4) * (SH - 6);
+      const q = a.map((x, i) => [sx(i), sy(x.v)]);
+      const d = now && prev ? Math.round((now.v - prev.v) * 10) / 10 : 0;
+      return {
+        name: p, score: now ? nz(now.v) + '/5' : '—', status: now ? stOf(now.v) : 'No check-ins yet',
+        delta: now && prev ? (d > 0 ? '▲ +' + nz(d) : d < 0 ? '▼ ' + nz(-d) : '● same') + ' since last' : '',
+        hasDelta: !!(now && prev), hasPath: q.length > 1, path: q.map((z, i) => (i ? 'L' : 'M') + z[0].toFixed(1) + ' ' + z[1].toFixed(1)).join(' '),
+        hasDot: q.length > 0, dotLeft: q.length ? (q[q.length - 1][0] / SW * 100).toFixed(2) + '%' : '0%', dotTop: q.length ? (q[q.length - 1][1] / SH * 100).toFixed(2) + '%' : '0%',
+        note: now && now.note ? now.note : '', hasNote: !!(now && now.note)
+      };
+    });
+    // heatmap: pillars x last reviews
+    const cols = scored.slice(-WCAP);
+    const pad = WCAP - cols.length;
+    const heat = {
+      cols: cols.map((r) => ({ t: lbl(r) })).concat(new Array(pad).fill(0).map(() => ({ t: '' }))),
+      rows: PILLARS.map((p) => ({
+        name: p,
+        cells: cols.map((r) => { const v = r.sc[p]; return v ? { txt: nz(v), bg: HEAT[Math.round(v) - 1], fg: HEATFG[Math.round(v) - 1], bd: HEAT[Math.round(v) - 1], tip: p + ' · ' + r.type + ' ' + r.date + ' · ' + nz(v) + '/5 ' + stOf(v) } : { txt: '', bg: 'transparent', fg: '#8A8A8A', bd: '#2A2A2A', tip: p + ' · ' + r.date + ' · not scored' }; })
+          .concat(new Array(pad).fill(0).map(() => ({ txt: '', bg: 'transparent', fg: '#8A8A8A', bd: '#2A2A2A', tip: 'No review' })))
+      })),
+      legend: HEAT.map((c, i) => ({ bg: c, fg: HEATFG[i], t: String(i + 1) }))
+    };
+    // weekly streak
+    const weeks = new Set(reviews.filter((r) => r.type === 'Weekly').map((r) => wk(r.date)));
+    const nowW = wk(todayStr);
+    let streak = 0, w0 = weeks.has(nowW) ? nowW : nowW - 1;
+    while (weeks.has(w0)) { streak++; w0--; }
+    const lastBlock = reviews.slice().sort((a, b) => (a.date < b.date ? 1 : -1)).find((r) => r.blocker);
+    // list
+    const list = reviews.filter((r) => !period || pkOf(r.date) === selK).slice().sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : a.id < b.id ? 1 : -1)).map((r) => {
+      const facts = [];
+      if (r.projects) facts.push({ k: 'PROJECTS MOVED', v: r.projects });
+      if (r.wins) facts.push({ k: 'QUICK WINS', v: r.wins });
+      if (r.blocker) facts.push({ k: 'BIGGEST BLOCKER', v: r.blocker });
+      PILLARS.forEach((p) => { if (r.pn[p]) facts.push({ k: p.toUpperCase() + ' NOTES', v: r.pn[p] }); });
+      const chips = PILLARS.filter((p) => r.sc[p]).map((p) => ({ text: p + ' · ' + r.sc[p] + '/5' }));
+      const focus = r.f.map((t, i) => ({ n: i + 1, t, line: (i + 1) + '. ' + t })).filter((x) => x.t);
+      return { head: r.type.toUpperCase() + ' · ' + r.date, facts, hasFacts: facts.length > 0, chips, hasChips: chips.length > 0, focus, hasFocus: focus.length > 0, obs: r.obs, hasObs: !!r.obs, del: () => this.setState({ pReviews: ((this.state || {}).pReviews || []).filter((x) => x.id !== r.id) }) };
+    });
+    // ---- habits: ticked on Home, shared through the browser; they never change your 1-5 scores ----
+    const HAB = [{ id: 'meditation', name: 'Meditation', pillar: 'Mind' }, { id: 'prayer', name: 'Prayer', pillar: 'Spirit' }, { id: 'training', name: 'Training', pillar: 'Body' }, { id: 'studying', name: 'Studying', pillar: 'Craft' }, { id: 'reading', name: 'Reading', pillar: 'Mind' }];
+    const hd = s.hdone || {};
+    const dstr = (y, m, d) => y + '-' + pad2(m + 1) + '-' + pad2(d);
+    const tY = +todayStr.slice(0, 4), tM = +todayStr.slice(5, 7) - 1, tD = +todayStr.slice(8, 10);
+    let hdays = [], hmode = 'day', hrange = 'Last 28 days';
+    if (!period) { for (let i = 27; i >= 0; i--) { const d = new Date(tY, tM, tD - i); hdays.push(dstr(d.getFullYear(), d.getMonth(), d.getDate())); } }
+    else if (flt === 'Weekly') { const a = new Date((7 * selK - 3) * 86400000); for (let i = 0; i < 7; i++) { const d = new Date(a.getUTCFullYear(), a.getUTCMonth(), a.getUTCDate() + i); hdays.push(dstr(d.getFullYear(), d.getMonth(), d.getDate())); } hrange = pLabel(selK); }
+    else if (flt === 'Monthly') { const y = Math.floor(selK / 12), m = selK % 12, n = new Date(y, m + 1, 0).getDate(); for (let d = 1; d <= n; d++) hdays.push(dstr(y, m, d)); hrange = pLabel(selK); }
+    else { hmode = 'month'; for (let m = 0; m < 12; m++) { const n = new Date(selK, m + 1, 0).getDate(); for (let d = 1; d <= n; d++) hdays.push(dstr(selK, m, d)); } hrange = String(selK); }
+    const elapsed = hdays.filter((d) => d <= todayStr);
+    const habRows = HAB.map((h) => {
+      const done = elapsed.filter((d) => hd[h.id + '|' + d]).length;
+      const cells = hmode === 'day'
+        ? hdays.map((d) => { const fut = d > todayStr, on = !!hd[h.id + '|' + d]; return { bg: on ? '#EDEDED' : 'transparent', bd: on ? '#EDEDED' : fut ? '#1F1F1F' : '#333333', tip: h.name + ' · ' + d + (fut ? ' · upcoming' : on ? ' · done' : ' · not done') }; })
+        : MON.map((mn, m) => { const ds = elapsed.filter((d) => +d.slice(5, 7) - 1 === m); const n = ds.filter((d) => hd[h.id + '|' + d]).length; const hi = n ? Math.max(1, Math.min(4, Math.floor(n / ds.length * 5))) : -1; return { bg: hi >= 0 ? HEAT[hi] : 'transparent', bd: hi >= 0 ? HEAT[hi] : ds.length ? '#333333' : '#1F1F1F', tip: h.name + ' · ' + mn + ' · ' + n + '/' + ds.length + ' days' }; });
+      return { name: h.name, pillar: h.pillar.toUpperCase(), done, total: elapsed.length, pct: elapsed.length ? Math.round(done / elapsed.length * 100) : 0, cells };
+    });
+    habRows.forEach((r) => { r.pctText = r.pct + '%'; r.tip = r.done + ' of ' + r.total + ' days'; });
+    const hcols = hmode === 'month' ? 'JFMAMJJASOND'.split('').map((t) => ({ t })) : flt === 'Weekly' ? 'MTWTFSS'.split('').map((t) => ({ t })) : flt === 'Monthly' ? hdays.map((d, i) => ({ t: i % 5 === 0 ? String(+d.slice(8, 10)) : '' })) : hdays.map((d, i) => ({ t: i === 0 || i === hdays.length - 1 ? md(d) : '' }));
+    const hTotal = habRows.reduce((a, r) => a + r.done, 0), hPoss = habRows.reduce((a, r) => a + r.total, 0);
+    cards.forEach((c) => {
+      const hs = habRows.filter((r) => r.pillar === c.name.toUpperCase());
+      if (!hs.length) { c.hab = 'NO HABIT LINKED'; return; }
+      const dn = hs.reduce((a, r) => a + r.done, 0), tt = hs.reduce((a, r) => a + r.total, 0);
+      c.hab = 'HABITS ' + (tt ? Math.round(dn / tt * 100) : 0) + '% · ' + hs.map((r) => r.name).join(', ');
+    });
+    const hab = { rows: habRows, cols: hcols, range: hrange, overall: (hPoss ? Math.round(hTotal / hPoss * 100) : 0) + '% of habit days done', hasAny: hTotal > 0, noAny: hTotal === 0 };
+    const perf = {
+      count: reviews.length + (reviews.length === 1 ? ' REVIEW' : ' REVIEWS'), nReviews: String(period ? reviews.filter((r) => pkOf(r.date) === selK).length : reviews.length), streak: String(streak), streakNote: streak === 1 ? 'week in a row' : 'weeks in a row',
+      blocker: lastBlock ? lastBlock.blocker : '—', hasData: scored.length > 0, noData: scored.length === 0,
+      overall, radar, trend, cards, hab, heat, filters, list, noList: list.length === 0,
+      emptyText: reviews.length === 0 ? 'No reviews yet.' : period ? 'No reviews in this ' + flt.toLowerCase().replace('ly', '') + '.' : 'No reviews yet.',
+      chartEmpty: reviews.length === 0 ? 'Charts fill in once you save a review with scores.' : period ? 'Nothing scored in this ' + flt.toLowerCase().replace('ly', '') + ' yet.' : 'No scored reviews yet.',
+      per: { show: period, label: period ? pLabel(selK) : '', sub: period ? (selK === curK ? 'THIS ' + flt.toUpperCase().replace('LY', '') : '') : '', hasSub: period && selK === curK, prev: () => stepPer(-1), next: () => stepPer(1), prevOp: selK <= minK ? '0.35' : '1', nextOp: selK >= maxK ? '0.35' : '1' },
+      open: pOpen, form
+    };
+    const fabAction = () => { const st = this.state || {}; this.setState({ pOpen: !st.pOpen, pForm: st.pForm || blank() }); };
+    // agent
+    const chatOpen = !!s.chatOpen;
+    const listening = !!s.listening;
+    const msgs = (s.msgs || []).map((m) => ({
+      text: m.text,
+      align: m.role === 'user' ? 'flex-end' : 'flex-start',
+      bg: m.role === 'user' ? '#EDEDED' : '#222222',
+      fg: m.role === 'user' ? '#121212' : '#B5B5B5'
+    }));
+    const prompts = ["What's due today?", 'Plan my day', 'Summarize this week'].map((text) => ({
+      text, pick: () => this.setState({ draft: text })
+    }));
+    const agentCtx = () => {
+      const out = [];
+      try { out.push('Today is ' + new Date().toDateString() + '. Page open: ' + ((typeof document !== 'undefined' && document.title) || 'LifeOS') + '.'); } catch (e) {}
+      try { if (typeof habits !== 'undefined') out.push('Habits today: ' + habits.map((h) => h.name + (h.done ? ' (done)' : ' (not yet)')).join(', ') + '.'); } catch (e) {}
+      try { if (typeof taskGroups !== 'undefined') out.push('Tasks: ' + (taskGroups.length ? taskGroups.map((g) => g.label + ': ' + g.items.map((t) => t.title).join('; ')).join(' | ') : 'none') + '.'); } catch (e) {}
+      try { if (typeof perf !== 'undefined' && perf.overall) out.push('Performance: overall ' + perf.overall.text + '/5 (' + perf.overall.delta + '); ' + perf.cards.map((c) => c.name + ' ' + c.score + ' ' + c.hab).join('; ') + '; reviews saved: ' + perf.count + '.'); } catch (e) {}
+      return out.join('\n');
+    };
+    const sendMsg = async () => {
+      const st = this.state || {};
+      const text = (st.draft || '').trim();
+      if (!text || st.thinking) return;
+      const history = (st.msgs || []).filter((m) => !m.err && m.text).slice(-8);
+      this.setState({ msgs: [...(st.msgs || []), { role: 'user', text }, { role: 'agent', text: 'Thinking…' }], draft: '', thinking: true });
+      const setLast = (t, err) => { const a = ((this.state || {}).msgs || []).slice(); a[a.length - 1] = { role: 'agent', text: t, err: !!err }; this.setState({ msgs: a }); };
+      try {
+        let cl = null;
+        try { cl = window.claude || (window.parent && window.parent.claude) || (window.top && window.top.claude) || null; } catch (e) { cl = window.claude || null; }
+        if (!cl) { setLast("Claude isn't reachable from this view. The page has no link to it here.", true); return; }
+        const sample = await cl.use('sample');
+        if (!sample) { setLast("Claude isn't available in this view.", true); return; }
+        const prompt = "You are the assistant inside Jess's LifeOS dashboard. Reply in a few short, plain sentences. You can only see the context below, not his Obsidian vault yet. If he asks about something outside it, say you can't see it yet. Never invent data.\n\nContext:\n" + agentCtx() + "\n\nConversation:\n" + history.map((m) => (m.role === 'user' ? 'Jess: ' : 'You: ') + m.text).join('\n') + (history.length ? '\n' : '') + 'Jess: ' + text + '\nYou:';
+        const r = await sample(prompt, { modelTier: 'quick', cache: false, onText: (o) => setLast(o.text) });
+        setLast((r && r.text) || 'No answer came back.');
+      } catch (e) {
+        setLast(e && e.code === 'not_granted' ? 'Claude is switched off for this view. Allow it when asked.' : e && e.code === 'rate_limited' ? 'Too many requests. Try again in a moment.' : (e && e.text) ? e.text : "Couldn't reach Claude" + (e && (e.code || e.message) ? ' (' + String(e.code || e.message).slice(0, 80) + ')' : '') + '. Try again.', !(e && e.text));
+      } finally { this.setState({ thinking: false }); }
+    };
+    const startVoice = () => {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) { this.setState({ chatOpen: true, voiceNote: "Voice input isn't available in this view." }); return; }
+      try {
+        const rec = new SR();
+        rec.interimResults = true;
+        rec.continuous = true;
+        rec.onresult = (e) => {
+          let t = '';
+          for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
+          this.setState({ draft: t });
+        };
+        rec.onend = () => this.setState({ listening: false });
+        rec.onerror = () => this.setState({ listening: false, voiceNote: "Couldn't use the microphone here." });
+        this._rec = rec;
+        rec.start();
+        this.setState({ chatOpen: true, listening: true, voiceNote: '' });
+      } catch (err) {
+        this.setState({ chatOpen: true, voiceNote: "Couldn't use the microphone here." });
+      }
+    };
+    const stopVoice = () => { try { if (this._rec) this._rec.stop(); } catch (err) {} this.setState({ listening: false }); };
+    // long-press menu on the bottom island
+    const NAVS = {
+      home: ['HOME', [['Tasks', 'TasksPhone.dc.html'], ['Calendar', 'CalendarPhone.dc.html'], ['Projects', 'ProjectsPhone.dc.html']]],
+      areas: ['AREAS', [['Health', 'HealthPhone.dc.html'], ['MMA', 'AreasPhone.dc.html'], ['Spiritual', 'AreasPhone.dc.html'], ['Work', 'AreasPhone.dc.html'], ['Finances', 'FinancesPhone.dc.html']]],
+      knowledge: ['KNOWLEDGE', [['Journal', 'KnowledgePhone.dc.html?sec=Journal'], ['College', 'KnowledgePhone.dc.html?sec=College'], ['Languages', 'KnowledgePhone.dc.html?sec=Languages'], ['Self-Study', 'KnowledgePhone.dc.html?sec=Self-Study'], ['Resources', 'KnowledgePhone.dc.html?sec=Resources'], ['People', 'KnowledgePhone.dc.html?sec=People'], ['Places', 'KnowledgePhone.dc.html?sec=Places']]]
+    };
+    const navKey = (this.state || {}).navMenu || '';
+    const navItems = navKey ? NAVS[navKey][1].map(([t, href], i) => {
+      const o = { t, href, delay: (70 + i * 45) + 'ms', color: href === '#' ? '#8A8A8A' : '#EDEDED', close: () => this.setState({ navMenu: '' }) };
+      ['Tasks', 'Calendar', 'Projects', 'Health', 'MMA', 'Spiritual', 'Work', 'Finances', 'Journal', 'College', 'Languages', 'SelfStudy', 'Resources', 'People', 'Places'].forEach((k) => { o['i' + k] = k === t.replace('-', ''); });
+      return o;
+    }) : [];
+    const navDown = (k) => () => { this._navLong = false; clearTimeout(this._nt); this._nt = setTimeout(() => { this._navLong = true; this.setState({ navMenu: k }); }, 450); };
+    return {
+      navOpen: !!navKey, navTitle: navKey ? NAVS[navKey][0] : '', navItems,
+      closeNav: () => this.setState({ navMenu: '' }),
+      navDownHome: navDown('home'), navDownAreas: navDown('areas'), navDownKnowledge: navDown('knowledge'),
+      navUp: () => clearTimeout(this._nt),
+      navClick: (e) => { if (this._navLong) { if (e && e.preventDefault) e.preventDefault(); this._navLong = false; } },
+      perf, fabZ: pOpen ? 46 : 20, fabShow: true, fabLabel: pOpen ? 'Close' : 'Add review', fabOpen: pOpen, fabRot: pOpen ? '45deg' : '0deg', fabAction,
+      chatOpen, listening, msgs, prompts, sendMsg,
+      noMsgs: msgs.length === 0,
+      draft: s.draft || '', voiceNote: s.voiceNote || '',
+      placeholder: listening ? 'Listening…' : 'Ask your vault',
+      agentRing: listening ? '#F5F5F5' : '#3A3A3A',
+      micBg: listening ? '#EDEDED' : '#222222',
+      micFg: listening ? '#121212' : '#D0D0D0',
+      closeChat: () => { stopVoice(); this.setState({ chatOpen: false }); },
+      onDraft: (e) => this.setState({ draft: e.target.value }),
+      onDraftKey: (e) => { if (e.key === 'Enter') sendMsg(); },
+      toggleMic: () => ((this.state || {}).listening ? stopVoice() : startVoice()),
+      noMenu: (e) => { if (e && e.preventDefault) e.preventDefault(); },
+      agentDown: () => {
+        this._long = false;
+        clearTimeout(this._lp);
+        this._lp = setTimeout(() => { this._long = true; startVoice(); }, 550);
+      },
+      agentUp: () => {
+        clearTimeout(this._lp);
+        if (this._long) stopVoice();
+      },
+      agentClick: () => {
+        if (this._long) { this._long = false; return; }
+        const st = this.state || {};
+        if (st.chatOpen) { stopVoice(); this.setState({ chatOpen: false }); } else this.setState({ chatOpen: true });
+      },
+    };
+  }
+}
+</script>

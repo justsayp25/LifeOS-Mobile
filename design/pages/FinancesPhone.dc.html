@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>LifeOS — Finances (phone)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: #121212; font-family: 'IBM Plex Sans', sans-serif; }
+  a { color: inherit; text-decoration: none; }
+  ::selection { background: rgba(255,255,255,0.22); }
+  button { font: inherit; color: inherit; }
+  button:focus-visible, a:focus-visible { outline: 2px solid #BDBDBD; outline-offset: 2px; }
+  h1, h2, p { margin: 0; }
+  input { font: inherit; color-scheme: dark; }
+  input::placeholder { color: #8A8A8A; }
+  input:focus-visible { outline: 2px solid #BDBDBD; outline-offset: 1px; }
+  @keyframes lgFade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes lgIn { 0% { opacity: 0; transform: translateY(22px) scale(0.82); filter: blur(10px); } 55% { opacity: 1; transform: translateY(-3px) scale(1.025); filter: blur(0); } 100% { opacity: 1; transform: none; filter: blur(0); } }
+  @keyframes lgItem { 0% { opacity: 0; transform: translateY(10px) scale(0.5); filter: blur(6px); } 65% { opacity: 1; transform: scale(1.1); filter: blur(0); } 100% { opacity: 1; transform: none; filter: blur(0); } }
+  .lg-item { transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.18s; }
+  .lg-item:active { transform: scale(0.88); background: rgba(255,255,255,0.14); }
+  @media (prefers-reduced-motion: reduce) { .lg-anim, .lg-item { animation: none !important; transition: none !important; } }
+  @keyframes agIn { 0% { opacity: 0; transform: translateY(28px) scale(0.8); filter: blur(10px); } 60% { opacity: 1; transform: translateY(-4px) scale(1.015); filter: blur(0); } 100% { opacity: 1; transform: none; filter: blur(0); } }
+  @media (prefers-reduced-motion: reduce) { .ag-anim { animation: none !important; } }
+  @keyframes pgFade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes pgUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  h1 { animation: pgUp 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) backwards; }
+  section, article, svg:not([width="22"]):not([width="14"]):not([width="16"]):not([width="18"]):not([width="20"]) { animation: pgFade 0.45s ease backwards; }
+  button[style*="border-radius: 16px"], div[style*="background: #1A1A1A"][style*="border-radius: 16px"] { animation: pgUp 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) backwards; }
+  button[style*="border-radius: 16px"]:nth-child(2), div[style*="border-radius: 16px"]:nth-child(2) { animation-delay: 0.03s; }
+  button[style*="border-radius: 16px"]:nth-child(3), div[style*="border-radius: 16px"]:nth-child(3) { animation-delay: 0.06s; }
+  button[style*="border-radius: 16px"]:nth-child(4), div[style*="border-radius: 16px"]:nth-child(4) { animation-delay: 0.09s; }
+  button[style*="border-radius: 16px"]:nth-child(n+5), div[style*="border-radius: 16px"]:nth-child(n+5) { animation-delay: 0.12s; }
+  button:not(.lg-scrim), a { transition: transform 0.16s ease, opacity 0.16s ease, background-color 0.16s ease, border-color 0.16s ease; }
+  button:not(.lg-scrim):active { transform: scale(0.97); }
+  @media (hover: hover) { button:not(.lg-scrim):hover, a:hover { opacity: 0.88; } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+  .rt-ed { outline: none; word-break: break-word; }
+  .rt-ed:empty::before { content: attr(data-ph); color: #8A8A8A; pointer-events: none; }
+  .rt-ed b, .rt-ed strong { font-weight: 700; color: #F5F5F5; }
+  .rt-ed h1 { margin: 0.4em 0 0.2em; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 28px; line-height: 1.2; color: #F5F5F5; }
+  .rt-ed h2 { margin: 0.4em 0 0.2em; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 22px; line-height: 1.25; color: #F5F5F5; }
+  .rt-ed font[size="2"] { font-size: 13px; }
+  .rt-ed ul { margin: 6px 0; padding-left: 22px; }
+</style>
+</helmet>
+
+<div style="position: relative; width: 390px; height: 844px; box-sizing: border-box; display: flex; flex-direction: column; background: #121212; color: #EDEDED; overflow: hidden;">
+
+  <!-- SCROLL AREA -->
+  
+
+  <!-- QUICK CAPTURE -->
+  <!-- AGENT BUTTON -->
+  <button type="button" aria-label="Open agent (hold to talk)" aria-expanded="{{chatOpen}}" onClick="{{agentClick}}" onPointerDown="{{agentDown}}" onPointerUp="{{agentUp}}" onPointerCancel="{{agentUp}}" onContextMenu="{{noMenu}}" style="position: absolute; left: 50%; margin-left: -26px; bottom: 22px; width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #000000; border: 1.5px solid {{agentRing}}; cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none; box-shadow: 0 6px 18px rgba(0,0,0,0.6); z-index: 30;"><span style="width: 12px; height: 12px; border-radius: 50%; background: #F5F5F5;"></span></button>
+
+  <sc-if value="{{chatOpen}}" hint-placeholder-val="{{ false }}">
+  <section aria-label="Agent" class="ag-anim" style="transform-origin: 50% 100%; animation: agIn 0.5s cubic-bezier(0.34, 1.4, 0.64, 1) backwards; position: absolute; left: 12px; right: 12px; top: 56px; bottom: 96px; display: flex; flex-direction: column; box-sizing: border-box; border-radius: 20px; background: #1A1A1A; border: 1px solid #2E2E2E; box-shadow: 0 16px 48px rgba(0,0,0,0.6); z-index: 25; overflow: hidden;">
+    <div style="display: flex; align-items: center; justify-content: space-between; padding: 6px 8px 6px 16px; border-bottom: 1px solid #262626;">
+      <span style="display: flex; align-items: center; gap: 10px; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 15px; color: #F5F5F5;"><span style="width: 8px; height: 8px; border-radius: 50%; background: #F5F5F5;"></span>Agent</span>
+      <button type="button" onClick="{{closeChat}}" aria-label="Close agent" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: none; border: 0; cursor: pointer; color: #B5B5B5;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
+    </div>
+    <div style="flex: 1; min-height: 0; overflow-y: auto; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;">
+      <sc-if value="{{noMsgs}}" hint-placeholder-val="{{ true }}">
+        <div style="margin: auto 0; display: flex; flex-direction: column; gap: 12px;">
+          <p style="font-size: 14px; line-height: 1.5; color: #A8A8A8;">Ask Claude about your day, tasks and habits. It can't read your vault yet.</p>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <sc-for list="{{prompts}}" as="q" hint-placeholder-count="3">
+              <button type="button" onClick="{{q.pick}}" style="min-height: 36px; padding: 0 14px; border-radius: 999px; background: #222222; border: 1px solid #333; cursor: pointer; font-size: 13px; color: #D0D0D0;">{{q.text}}</button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+      <sc-for list="{{msgs}}" as="m" hint-placeholder-count="2">
+        <div style="align-self: {{m.align}}; max-width: 85%; padding: 9px 13px; border-radius: 14px; font-size: 14px; line-height: 1.45; background: {{m.bg}}; color: {{m.fg}};">{{m.text}}</div>
+      </sc-for>
+    </div>
+    <sc-if value="{{voiceNote}}" hint-placeholder-val="{{ false }}">
+      <p style="padding: 0 16px 8px; font-size: 12.5px; color: #B5B5B5;">{{voiceNote}}</p>
+    </sc-if>
+    <div style="display: flex; align-items: center; gap: 8px; padding: 10px 12px 12px; border-top: 1px solid #262626;">
+      <input type="text" aria-label="Message the agent" placeholder="{{placeholder}}" value="{{draft}}" onInput="{{onDraft}}" onKeyDown="{{onDraftKey}}" style="flex: 1; min-width: 0; height: 44px; box-sizing: border-box; padding: 0 14px; border-radius: 12px; background: #222222; border: 1px solid #333; color: #F5F5F5; font-size: 14px;">
+      <button type="button" onClick="{{toggleMic}}" aria-label="Voice input" aria-pressed="{{listening}}" style="width: 44px; height: 44px; flex: 0 0 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: {{micBg}}; border: 1px solid #333; color: {{micFg}};"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"></rect><path d="M5 11a7 7 0 0 0 14 0M12 18v3"></path></svg></button>
+      <button type="button" onClick="{{sendMsg}}" aria-label="Send" style="width: 44px; height: 44px; flex: 0 0 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: #EDEDED; border: 0; color: #121212;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"></path></svg></button>
+    </div>
+  </section>
+  </sc-if>
+
+  <!-- BOTTOM TABS -->
+  <sc-if value="{{fabShow}}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{fabAction}}" aria-label="{{fabLabel}}" aria-expanded="{{fabOpen}}" style="position: absolute; right: 16px; bottom: 96px; width: 52px; height: 52px; border: 1px solid #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; background: #222222; color: #D8D8D8; box-shadow: 0 6px 18px rgba(0,0,0,0.6); z-index: {{fabZ}};"><svg style="transform: rotate({{fabRot}}); transition: transform 0.15s;" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg></button></sc-if>
+  <sc-if value="{{fin.open}}" hint-placeholder-val="{{ false }}"><div style="position: absolute; inset: 0; z-index: 44;"><button type="button" onClick="{{fin.cancel}}" aria-label="Close" class="lg-anim" style="position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; background: rgba(0,0,0,0.35); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); cursor: default; animation: lgFade 0.22s ease-out backwards;"></button><div id="fcomp" role="dialog" aria-label="New entry" class="lg-anim" style="position: absolute; z-index: 45; left: 12px; right: 12px; top: 56px; max-height: calc(100% - 190px); overflow-y: auto; box-sizing: border-box; padding: 14px; border-radius: 28px; display: flex; flex-direction: column; gap: 10px; background: rgba(46,46,46,0.55); -webkit-backdrop-filter: blur(24px) saturate(170%); backdrop-filter: blur(24px) saturate(170%); border: 1px solid rgba(255,255,255,0.14); box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), inset 0 -1px 0 rgba(255,255,255,0.05), 0 16px 40px rgba(0,0,0,0.5); transform-origin: 85% 100%; animation: lgIn 0.46s cubic-bezier(0.34, 1.4, 0.64, 1) backwards;"><div style="display: flex; flex-direction: column; gap: 6px;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: #8A8A8A;">ASSET</span><div style="display: flex; flex-wrap: wrap; gap: 8px;"><sc-for list="{{fin.chips}}" as="c" hint-placeholder-count="4"><button type="button" onClick="{{c.pick}}" style="min-height: 44px; padding: 0 14px; border-radius: 22px; cursor: pointer; font-size: 13.5px; background: {{c.bg}}; color: {{c.fg}}; border: 1px solid {{c.bd}};">{{c.name}}</button></sc-for></div></div><div style="display: flex; gap: 8px;"><sc-for list="{{fin.kinds}}" as="k" hint-placeholder-count="2"><button type="button" onClick="{{k.pick}}" style="flex: 1; min-height: 44px; border-radius: 12px; cursor: pointer; font-size: 14px; background: {{k.bg}}; color: {{k.fg}}; border: 1px solid {{k.bd}};">{{k.label}}</button></sc-for></div><div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;"><label style="display: flex; flex-direction: column; gap: 4px; min-width: 0;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: #8A8A8A;">AMOUNT (₱)</span><input type="text" inputmode="decimal" aria-label="Amount" value="{{fin.amt}}" onInput="{{fin.onAmt}}" onKeyDown="{{fin.onKey}}" style="width: 100%; box-sizing: border-box; height: 44px; padding: 0 12px; border-radius: 12px; background: #222222; border: 1px solid #333; color: #F5F5F5; font-size: 16px;"></label><label style="display: flex; flex-direction: column; gap: 4px; min-width: 0;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: #8A8A8A;">DATE</span><input type="date" aria-label="Date" value="{{fin.date}}" onInput="{{fin.onDate}}" style="width: 100%; box-sizing: border-box; height: 44px; padding: 0 12px; border-radius: 12px; background: #222222; border: 1px solid #333; color: #F5F5F5; font-size: 16px;"></label></div><sc-if value="{{fin.hasErr}}" hint-placeholder-val="{{ false }}"><p style="margin: 0; font-size: 13px; color: #B5B5B5;">{{fin.err}}</p></sc-if><div style="display: flex; justify-content: flex-end; gap: 6px;"><button type="button" onClick="{{fin.cancel}}" style="height: 44px; padding: 0 14px; background: none; border: 0; cursor: pointer; font-size: 13.5px; color: #B5B5B5;">Cancel</button><button type="button" onClick="{{fin.submit}}" aria-label="Add entry" style="height: 44px; padding: 0 18px; border-radius: 12px; background: #EDEDED; border: 0; cursor: pointer; font-size: 14px; font-weight: 500; color: #121212;">Add</button></div></div></div></sc-if>
+  <sc-if value="{{navOpen}}" hint-placeholder-val="{{ false }}"><div style="position: absolute; inset: 0; z-index: 60;"><button type="button" onClick="{{closeNav}}" aria-label="Close menu" class="lg-anim" style="position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; background: rgba(0,0,0,0.35); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); cursor: default; animation: lgFade 0.22s ease-out backwards;"></button><nav aria-label="{{navTitle}}" class="lg-anim" style="position: absolute; z-index: 41; left: 16px; right: 16px; bottom: 92px; height: 64px; box-sizing: border-box; padding: 0 8px; border-radius: 32px; display: flex; align-items: center; justify-content: space-around; background: rgba(46,46,46,0.55); -webkit-backdrop-filter: blur(24px) saturate(170%); backdrop-filter: blur(24px) saturate(170%); border: 1px solid rgba(255,255,255,0.14); box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), inset 0 -1px 0 rgba(255,255,255,0.05), 0 16px 40px rgba(0,0,0,0.5); transform-origin: 50% 100%; animation: lgIn 0.46s cubic-bezier(0.34, 1.4, 0.64, 1) backwards;"><sc-for list="{{navItems}}" as="n" hint-placeholder-count="5"><a href="{{n.href}}" onClick="{{n.close}}" aria-label="{{n.t}}" class="lg-item" style="flex: 1 0 44px; min-width: 44px; height: 48px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border-radius: 24px; color: {{n.color}}; animation: lgItem 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) {{n.delay}} backwards;"><sc-if value="{{n.iTasks}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 11 3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg></sc-if><sc-if value="{{n.iCalendar}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><path d="M8 14h.01"></path><path d="M12 14h.01"></path><path d="M16 14h.01"></path><path d="M8 18h.01"></path><path d="M12 18h.01"></path></svg></sc-if><sc-if value="{{n.iProjects}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2Z"></path></svg></sc-if><sc-if value="{{n.iHealth}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg></sc-if><sc-if value="{{n.iMMA}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11V8.3a2.3 2.3 0 0 1 4.6 0V10"></path><path d="M13.6 9.8a2.3 2.3 0 0 1 4.4.9V15a5.5 5.5 0 0 1-5.5 5.5h-1A5.5 5.5 0 0 1 6 15v-2.7c0-1.1.9-1.8 1.8-1.8H9"></path><rect x="7.5" y="16" width="9" height="4.2" rx="1.6"></rect></svg></sc-if><sc-if value="{{n.iSpiritual}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20"></path><path d="M6 8h12"></path></svg></sc-if><sc-if value="{{n.iWork}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg></sc-if><sc-if value="{{n.iFinances}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg></sc-if><sc-if value="{{n.iJournal}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20 M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"></path></svg></sc-if><sc-if value="{{n.iCollege}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 10-10-5-10 5 10 5 10-5Z M6 12v5c3 3 9 3 12 0v-5"></path></svg></sc-if><sc-if value="{{n.iLanguages}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6 M4 14l6-6 2-3 M2 5h12 M7 2h1 m22 22-5-10-5 10 M14 18h6"></path></svg></sc-if><sc-if value="{{n.iSelfStudy}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5 M9 18h6 M10 22h4"></path></svg></sc-if><sc-if value="{{n.iResources}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2Z"></path></svg></sc-if><sc-if value="{{n.iPeople}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8 M22 21v-2a4 4 0 0 0-3-3.9 M16 3.1a4 4 0 0 1 0 7.8"></path></svg></sc-if><sc-if value="{{n.iPlaces}}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z M12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6"></path></svg></sc-if></a></sc-for></nav></div></sc-if>
+  <nav aria-label="Main" style="position: absolute; z-index: 25; left: 16px; right: 16px; bottom: 16px; height: 64px; box-sizing: border-box; padding: 0 14px; border-radius: 32px; display: flex; align-items: center; justify-content: space-around; background: #1E1E1E; border: 1px solid #2E2E2E; box-shadow: 0 10px 28px rgba(0,0,0,0.55);">
+    <a href="Phone.dc.html" aria-label="Home" onPointerDown="{{navDownHome}}" onPointerUp="{{navUp}}" onPointerCancel="{{navUp}}" onContextMenu="{{noMenu}}" onClick="{{navClick}}" style="width: 56px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center; background: transparent; color: #9A9A9A;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-7 9 7"></path><path d="M5 10v10a1 1 0 0 0 1 1h3v-6h6v6h3a1 1 0 0 0 1-1V10"></path></svg></a>
+    <a href="AreasPhone.dc.html" aria-label="Areas" onPointerDown="{{navDownAreas}}" onPointerUp="{{navUp}}" onPointerCancel="{{navUp}}" onContextMenu="{{noMenu}}" onClick="{{navClick}}" aria-current="page" style="width: 56px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center; background: #2C2C2C; color: #F5F5F5;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg></a>
+    <span aria-hidden="true" style="width: 60px; flex: 0 0 60px;"></span>
+    <a href="KnowledgePhone.dc.html" aria-label="Knowledge" onPointerDown="{{navDownKnowledge}}" onPointerUp="{{navUp}}" onPointerCancel="{{navUp}}" onContextMenu="{{noMenu}}" onClick="{{navClick}}" style="width: 56px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center; background: transparent; color: #9A9A9A;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"></path></svg></a>
+    <a href="PerformancePhone.dc.html" aria-label="Performance" style="width: 56px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center; background: transparent; color: #9A9A9A;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line><line x1="6" y1="20" x2="6" y2="16"></line></svg></a>
+  </nav>
+  <div style="flex: 1; min-height: 0; overflow-y: auto; box-sizing: border-box; padding: 18px 16px 96px; display: flex; flex-direction: column;">
+      <sc-if value="{{fin.inList}}" hint-placeholder-val="{{ true }}"><a href="AreasPhone.dc.html" aria-label="Back to Areas" style="width: 44px; min-height: 44px; margin-left: -14px; padding: 0; display: inline-flex; align-items: center; justify-content: center; background: none; border: 0; cursor: pointer; font-size: 14px; color: #B5B5B5;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></a><div style="margin-top: 6px;"><h1 style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 34px; line-height: 1.05; letter-spacing: -0.02em; color: #F5F5F5;">Finances</h1></div><section style="margin-top: 16px; box-sizing: border-box; padding: 16px; border-radius: 16px; background: #1A1A1A; border: 1px solid #292929; display: flex; flex-direction: column; gap: 10px;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: #8A8A8A;">TOTAL</span><p style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 40px; line-height: 1.05; letter-spacing: -0.02em; color: #F5F5F5;">{{fin.total}}</p><div style="display: flex; flex-direction: column; gap: 6px;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: #8A8A8A;">{{fin.topLabel}}</span><div style="position: relative;"><svg viewBox="0 0 600 160" preserveAspectRatio="none" role="img" aria-label="Total money over time" style="width: 100%; height: 140px; display: block;"><defs><linearGradient id="finfill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F5F5F5" stop-opacity="0.16"></stop><stop offset="1" stop-color="#F5F5F5" stop-opacity="0"></stop></linearGradient></defs><path d="{{fin.grid}}" fill="none" stroke="#2A2A2A" stroke-width="1" vector-effect="non-scaling-stroke"></path><path d="M0 159.5 L600 159.5" fill="none" stroke="#333" stroke-width="1" vector-effect="non-scaling-stroke"></path><path d="{{fin.area}}" fill="url(#finfill)"></path><path d="{{fin.line}}" fill="none" stroke="#F5F5F5" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"></path></svg><sc-if value="{{fin.hasNote}}" hint-placeholder-val="{{ false }}"><span style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 0 12px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.08em; color: #8A8A8A;">{{fin.chartNote}}</span></sc-if></div><div style="display: flex; justify-content: space-between;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: #8A8A8A;">{{fin.firstD}}</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: #8A8A8A;">{{fin.lastD}}</span></div></div></section><h2 style="margin: 28px 0 12px; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 18px; color: #F5F5F5;">Assets</h2><div style="display: grid; grid-template-columns: repeat(1, minmax(0, 1fr)); gap: 12px;"><sc-for list="{{fin.assets}}" as="a" hint-placeholder-count="8"><button type="button" onClick="{{a.open}}" aria-label="{{a.label}}" style="text-align: left; min-height: 44px; box-sizing: border-box; padding: 16px; border-radius: 16px; background: #1A1A1A; border: 1px solid #292929; display: flex; flex-direction: column; gap: 8px; cursor: pointer;"><span style="font-size: 14px; color: #C8C8C8;">{{a.name}}</span><span style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 22px; color: #F5F5F5;">{{a.value}}</span><span style="display: block; height: 4px; border-radius: 2px; background: #2A2A2A; overflow: hidden;"><span style="display: block; height: 4px; background: #D8D8D8; width: {{a.barW}};"></span></span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: #8A8A8A;">{{a.pct}} OF TOTAL</span></button></sc-for></div></sc-if>
+      <sc-if value="{{fin.inAsset}}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{fin.back}}" aria-label="Back to Finances" style="width: 44px; min-height: 44px; margin-left: -14px; padding: 0; display: inline-flex; align-items: center; justify-content: center; background: none; border: 0; cursor: pointer; font-size: 14px; color: #B5B5B5;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></button><div style="margin-top: 6px;"><h1 style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 34px; line-height: 1.05; letter-spacing: -0.02em; color: #F5F5F5;">{{fin.assetName}}</h1></div><p style="margin: 6px 0 0; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 28px; color: #F5F5F5;">{{fin.assetValue}}</p><section style="margin-top: 16px; box-sizing: border-box; padding: 16px; border-radius: 16px; background: #1A1A1A; border: 1px solid #292929; display: flex; flex-direction: column;"><h2 style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 18px; color: #F5F5F5; margin-bottom: 8px;">Log</h2><sc-if value="{{fin.noRows}}" hint-placeholder-val="{{ true }}"><p style="margin: 6px 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.08em; color: #8A8A8A;">NO ENTRIES YET</p></sc-if><sc-for list="{{fin.rows}}" as="r" hint-placeholder-count="3"><div style="display: flex; align-items: center; gap: 12px; min-height: 52px; border-top: 1px solid #242424;"><span style="flex: 0 0 auto; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8A8A8A;">{{r.date}}</span><span style="flex: 1; min-width: 0; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: #8A8A8A;">{{r.kindText}}</span><span style="font-size: 15px; color: #EDEDED;">{{r.amount}}</span><button type="button" onClick="{{r.del}}" aria-label="{{r.delLabel}}" style="width: 44px; height: 44px; flex: 0 0 44px; display: flex; align-items: center; justify-content: center; background: none; border: 0; cursor: pointer; color: #8A8A8A;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div></sc-for></section></sc-if>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"hour12":{"editor":"boolean","default":true},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  componentDidMount() {
+    // island: slide the active pill from the previous section to this one
+    try {
+      const go = () => {
+        const nav = document.querySelector('nav[aria-label="Main"]');
+        const cur = nav && nav.querySelector('a[aria-current]');
+        if (!cur || !cur.animate) return;
+        const name = cur.getAttribute('aria-label');
+        let prev = '';
+        try { prev = window.sessionStorage.getItem('lifeos-island') || ''; window.sessionStorage.setItem('lifeos-island', name); } catch (e) {}
+        const old = prev && prev !== name ? nav.querySelector('a[aria-label="' + prev + '"]') : null;
+        const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reduce) return;
+        const ease = 'cubic-bezier(0.34, 1.56, 0.64, 1)';
+        if (old) {
+          const a = old.getBoundingClientRect(), b = cur.getBoundingClientRect();
+          const dx = (a.left + a.width / 2) - (b.left + b.width / 2);
+          cur.animate([
+            { transform: 'translateX(' + dx + 'px) scale(1, 1)' },
+            { transform: 'translateX(' + dx * 0.45 + 'px) scale(1.5, 0.9)', offset: 0.42 },
+            { transform: 'translateX(0) scale(1, 1)' }
+          ], { duration: 620, easing: ease });
+        } else {
+          cur.animate([{ transform: 'scale(0.6)', opacity: 0.4 }, { transform: 'scale(1.1)', opacity: 1, offset: 0.6 }, { transform: 'scale(1)', opacity: 1 }], { duration: 480, easing: ease });
+        }
+      };
+      setTimeout(go, 40);
+    } catch (e) {}
+  }
+  renderVals() {
+    const s = this.state || {};
+
+    // finances — assets from 1 Human/13 Finance/Assets. Manual entries only, no bank or API connections. Session-only until the vault write-back exists.
+    const pad2 = (n) => String(n).padStart(2, '0');
+    const dk = (d) => d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+    const todayStr = dk(new Date());
+    const md = (k) => k.slice(5, 7) + '/' + k.slice(8, 10);
+    const ASSETS = ['Cash', 'DragonFi', 'GCash', 'GoTYME', 'GoTrade', 'Maribank', 'Maya', 'Wise'];
+    const entries = s.fEntries || [];
+    const peso = (n) => { const a = Math.abs(n); const t = a.toLocaleString('en-US', { minimumFractionDigits: Math.round(a * 100) % 100 ? 2 : 0, maximumFractionDigits: 2 }); return (n < 0 ? '-' : '') + '₱' + t; };
+    const bal = {};
+    ASSETS.forEach((a) => { bal[a] = 0; });
+    entries.forEach((e) => { bal[e.asset] += e.kind === 'deposit' ? e.amt : -e.amt; });
+    const total = ASSETS.reduce((n, a) => n + bal[a], 0);
+    // total over time: running total after each day's entries
+    const sorted = entries.slice().sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : a.id < b.id ? -1 : 1));
+    const byDay = [];
+    let run = 0;
+    sorted.forEach((e) => { run += e.kind === 'deposit' ? e.amt : -e.amt; if (byDay.length && byDay[byDay.length - 1].d === e.date) byDay[byDay.length - 1].v = run; else byDay.push({ d: e.date, v: run }); });
+    const W = 600, H = 160, P = 10;
+    let line = '', area = '', topLabel = peso(0), firstD = md(todayStr), lastD = md(todayStr);
+    const grid = [0.25, 0.5, 0.75].map((g) => 'M0 ' + (H * g).toFixed(1) + ' L' + W + ' ' + (H * g).toFixed(1)).join(' ');
+    if (byDay.length >= 1) {
+      const t0 = new Date(byDay[0].d + 'T00:00:00').getTime(), t1 = new Date(byDay[byDay.length - 1].d + 'T00:00:00').getTime();
+      const vmax = Math.max.apply(null, byDay.map((p) => p.v).concat([0])), vmin = Math.min.apply(null, byDay.map((p) => p.v).concat([0]));
+      const span = vmax - vmin || 1;
+      const yOf = (v) => H - P - ((v - vmin) / span) * (H - 2 * P);
+      let pts = byDay.map((p) => [P + ((new Date(p.d + 'T00:00:00').getTime() - t0) / (t1 - t0 || 1)) * (W - 2 * P), yOf(p.v)]);
+      if (pts.length === 1) pts = [[P, pts[0][1]], [W - P, pts[0][1]]];
+      line = pts.map((q, i) => (i ? 'L' : 'M') + q[0].toFixed(1) + ' ' + q[1].toFixed(1)).join(' ');
+      area = line + ' L' + pts[pts.length - 1][0].toFixed(1) + ' ' + H + ' L' + pts[0][0].toFixed(1) + ' ' + H + ' Z';
+      topLabel = peso(vmax); firstD = md(byDay[0].d); lastD = md(byDay[byDay.length - 1].d);
+    }
+    const hasChart = true;
+    const chartNote = entries.length === 0 ? 'NO ENTRIES YET' : byDay.length < 2 ? 'ADD ENTRIES ON ANOTHER DAY TO SEE THE TREND' : '';
+    const openAsset = s.fAsset || '';
+    const fOpen = !!s.fOpen;
+    const f = s.fForm || { asset: '', kind: 'deposit', amt: '', date: todayStr, err: '' };
+    const setF = (o) => this.setState({ fForm: { ...((this.state || {}).fForm || { asset: '', kind: 'deposit', amt: '', date: todayStr, err: '' }), ...o } });
+    const showComposer = () => {};
+    const submit = () => {
+      const st = this.state || {};
+      const ff = st.fForm || f;
+      const amt = parseFloat(String(ff.amt || '').replace(/,/g, ''));
+      const asset = ff.asset;
+      if (!asset) { setF({ err: 'Pick an asset.' }); return; }
+      if (!(amt > 0)) { setF({ err: 'Enter an amount.' }); return; }
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(ff.date || '')) { setF({ err: 'Pick a date.' }); return; }
+      const cur = (st.fEntries || []).reduce((n, e) => (e.asset === asset ? n + (e.kind === 'deposit' ? e.amt : -e.amt) : n), 0);
+      if (ff.kind === 'withdraw' && amt > cur + 0.00001) { setF({ err: 'More than the balance.' }); return; }
+      this.setState({ fEntries: [...(st.fEntries || []), { id: 'e' + Date.now(), asset, kind: ff.kind, amt: Math.round(amt * 100) / 100, date: ff.date }], fForm: { asset, kind: 'deposit', amt: '', date: todayStr, err: '' }, fOpen: false });
+    };
+    const assetsList = ASSETS.map((a) => {
+      const v = bal[a], pct = total > 0 && v > 0 ? Math.round((v / total) * 100) : 0;
+      return { name: a, value: peso(v), pct: pct + '%', barW: pct + '%', hasPct: pct > 0, open: () => { this.setState({ fAsset: a }); try { window.scrollTo(0, 0); } catch (e) {} }, label: 'Open ' + a };
+    });
+    const rows = entries.filter((e) => e.asset === openAsset).slice().sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : a.id < b.id ? 1 : -1)).map((e) => ({
+      date: md(e.date), kindText: e.kind === 'deposit' ? 'DEPOSIT' : 'WITHDRAW', amount: (e.kind === 'deposit' ? '+' : '-') + peso(e.amt).replace('-', ''),
+      del: () => this.setState({ fEntries: ((this.state || {}).fEntries || []).filter((x) => x.id !== e.id) }), delLabel: 'Delete entry'
+    }));
+    const chips = ASSETS.map((a) => { const on = f.asset === a; return { name: a, bg: on ? '#EDEDED' : '#222222', fg: on ? '#121212' : '#D0D0D0', bd: on ? '#EDEDED' : '#333', pick: () => setF({ asset: a, err: '' }) }; });
+    const kinds = [['deposit', 'Deposit'], ['withdraw', 'Withdraw']].map(([id, label]) => { const on = f.kind === id; return { label, bg: on ? '#EDEDED' : '#222222', fg: on ? '#121212' : '#D0D0D0', bd: on ? '#EDEDED' : '#333', pick: () => setF({ kind: id, err: '' }) }; });
+    const fin = {
+      inList: !openAsset, inAsset: !!openAsset, assetName: openAsset, assetValue: peso(bal[openAsset] || 0), total: peso(total),
+      hasChart, hasNote: !!chartNote, chartNote, grid, line, area, topLabel, firstD, lastD,
+      assets: assetsList, rows, noRows: rows.length === 0,
+      back: () => { this.setState({ fAsset: '', fOpen: false }); try { window.scrollTo(0, 0); } catch (e) {} },
+      open: fOpen, chips, kinds, amt: f.amt, date: f.date, err: f.err, hasErr: !!f.err,
+      onAmt: (e) => setF({ amt: e.target.value, err: '' }), onDate: (e) => setF({ date: e.target.value, err: '' }),
+      onKey: (e) => { if (e.key === 'Enter') submit(); }, submit, cancel: () => this.setState({ fOpen: false })
+    };
+    const fabAction = () => {
+      const st = this.state || {};
+      if (st.fOpen) { this.setState({ fOpen: false }); return; }
+      const cur = st.fForm || f;
+      this.setState({ fOpen: true, fForm: { ...cur, asset: st.fAsset || cur.asset || '', err: '' } });
+      showComposer();
+    };
+    // agent
+    const chatOpen = !!s.chatOpen;
+    const listening = !!s.listening;
+    const msgs = (s.msgs || []).map((m) => ({
+      text: m.text,
+      align: m.role === 'user' ? 'flex-end' : 'flex-start',
+      bg: m.role === 'user' ? '#EDEDED' : '#222222',
+      fg: m.role === 'user' ? '#121212' : '#B5B5B5'
+    }));
+    const prompts = ["What's due today?", 'Plan my day', 'Summarize this week'].map((text) => ({
+      text, pick: () => this.setState({ draft: text })
+    }));
+    const agentCtx = () => {
+      const out = [];
+      try { out.push('Today is ' + new Date().toDateString() + '. Page open: ' + ((typeof document !== 'undefined' && document.title) || 'LifeOS') + '.'); } catch (e) {}
+      try { if (typeof habits !== 'undefined') out.push('Habits today: ' + habits.map((h) => h.name + (h.done ? ' (done)' : ' (not yet)')).join(', ') + '.'); } catch (e) {}
+      try { if (typeof taskGroups !== 'undefined') out.push('Tasks: ' + (taskGroups.length ? taskGroups.map((g) => g.label + ': ' + g.items.map((t) => t.title).join('; ')).join(' | ') : 'none') + '.'); } catch (e) {}
+      try { if (typeof perf !== 'undefined' && perf.overall) out.push('Performance: overall ' + perf.overall.text + '/5 (' + perf.overall.delta + '); ' + perf.cards.map((c) => c.name + ' ' + c.score + ' ' + c.hab).join('; ') + '; reviews saved: ' + perf.count + '.'); } catch (e) {}
+      return out.join('\n');
+    };
+    const sendMsg = async () => {
+      const st = this.state || {};
+      const text = (st.draft || '').trim();
+      if (!text || st.thinking) return;
+      const history = (st.msgs || []).filter((m) => !m.err && m.text).slice(-8);
+      this.setState({ msgs: [...(st.msgs || []), { role: 'user', text }, { role: 'agent', text: 'Thinking…' }], draft: '', thinking: true });
+      const setLast = (t, err) => { const a = ((this.state || {}).msgs || []).slice(); a[a.length - 1] = { role: 'agent', text: t, err: !!err }; this.setState({ msgs: a }); };
+      try {
+        let cl = null;
+        try { cl = window.claude || (window.parent && window.parent.claude) || (window.top && window.top.claude) || null; } catch (e) { cl = window.claude || null; }
+        if (!cl) { setLast("Claude isn't reachable from this view. The page has no link to it here.", true); return; }
+        const sample = await cl.use('sample');
+        if (!sample) { setLast("Claude isn't available in this view.", true); return; }
+        const prompt = "You are the assistant inside Jess's LifeOS dashboard. Reply in a few short, plain sentences. You can only see the context below, not his Obsidian vault yet. If he asks about something outside it, say you can't see it yet. Never invent data.\n\nContext:\n" + agentCtx() + "\n\nConversation:\n" + history.map((m) => (m.role === 'user' ? 'Jess: ' : 'You: ') + m.text).join('\n') + (history.length ? '\n' : '') + 'Jess: ' + text + '\nYou:';
+        const r = await sample(prompt, { modelTier: 'quick', cache: false, onText: (o) => setLast(o.text) });
+        setLast((r && r.text) || 'No answer came back.');
+      } catch (e) {
+        setLast(e && e.code === 'not_granted' ? 'Claude is switched off for this view. Allow it when asked.' : e && e.code === 'rate_limited' ? 'Too many requests. Try again in a moment.' : (e && e.text) ? e.text : "Couldn't reach Claude" + (e && (e.code || e.message) ? ' (' + String(e.code || e.message).slice(0, 80) + ')' : '') + '. Try again.', !(e && e.text));
+      } finally { this.setState({ thinking: false }); }
+    };
+    const startVoice = () => {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) { this.setState({ chatOpen: true, voiceNote: "Voice input isn't available in this view." }); return; }
+      try {
+        const rec = new SR();
+        rec.interimResults = true;
+        rec.continuous = true;
+        rec.onresult = (e) => {
+          let t = '';
+          for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
+          this.setState({ draft: t });
+        };
+        rec.onend = () => this.setState({ listening: false });
+        rec.onerror = () => this.setState({ listening: false, voiceNote: "Couldn't use the microphone here." });
+        this._rec = rec;
+        rec.start();
+        this.setState({ chatOpen: true, listening: true, voiceNote: '' });
+      } catch (err) {
+        this.setState({ chatOpen: true, voiceNote: "Couldn't use the microphone here." });
+      }
+    };
+    const stopVoice = () => { try { if (this._rec) this._rec.stop(); } catch (err) {} this.setState({ listening: false }); };
+    // long-press menu on the bottom island
+    const NAVS = {
+      home: ['HOME', [['Tasks', 'TasksPhone.dc.html'], ['Calendar', 'CalendarPhone.dc.html'], ['Projects', 'ProjectsPhone.dc.html']]],
+      areas: ['AREAS', [['Health', 'HealthPhone.dc.html'], ['MMA', 'AreasPhone.dc.html'], ['Spiritual', 'AreasPhone.dc.html'], ['Work', 'AreasPhone.dc.html'], ['Finances', 'FinancesPhone.dc.html']]],
+      knowledge: ['KNOWLEDGE', [['Journal', 'KnowledgePhone.dc.html?sec=Journal'], ['College', 'KnowledgePhone.dc.html?sec=College'], ['Languages', 'KnowledgePhone.dc.html?sec=Languages'], ['Self-Study', 'KnowledgePhone.dc.html?sec=Self-Study'], ['Resources', 'KnowledgePhone.dc.html?sec=Resources'], ['People', 'KnowledgePhone.dc.html?sec=People'], ['Places', 'KnowledgePhone.dc.html?sec=Places']]]
+    };
+    const navKey = (this.state || {}).navMenu || '';
+    const navItems = navKey ? NAVS[navKey][1].map(([t, href], i) => {
+      const o = { t, href, delay: (70 + i * 45) + 'ms', color: href === '#' ? '#8A8A8A' : '#EDEDED', close: () => this.setState({ navMenu: '' }) };
+      ['Tasks', 'Calendar', 'Projects', 'Health', 'MMA', 'Spiritual', 'Work', 'Finances', 'Journal', 'College', 'Languages', 'SelfStudy', 'Resources', 'People', 'Places'].forEach((k) => { o['i' + k] = k === t.replace('-', ''); });
+      return o;
+    }) : [];
+    const navDown = (k) => () => { this._navLong = false; clearTimeout(this._nt); this._nt = setTimeout(() => { this._navLong = true; this.setState({ navMenu: k }); }, 450); };
+    return {
+      navOpen: !!navKey, navTitle: navKey ? NAVS[navKey][0] : '', navItems,
+      closeNav: () => this.setState({ navMenu: '' }),
+      navDownHome: navDown('home'), navDownAreas: navDown('areas'), navDownKnowledge: navDown('knowledge'),
+      navUp: () => clearTimeout(this._nt),
+      navClick: (e) => { if (this._navLong) { if (e && e.preventDefault) e.preventDefault(); this._navLong = false; } },
+      fin, fabZ: fOpen ? 46 : 20, fabShow: true, fabLabel: fOpen ? 'Close' : 'Add entry', fabOpen: fOpen, fabRot: fOpen ? '45deg' : '0deg', fabAction,
+      chatOpen, listening, msgs, prompts, sendMsg,
+      noMsgs: msgs.length === 0,
+      draft: s.draft || '', voiceNote: s.voiceNote || '',
+      placeholder: listening ? 'Listening…' : 'Ask your vault',
+      agentRing: listening ? '#F5F5F5' : '#3A3A3A',
+      micBg: listening ? '#EDEDED' : '#222222',
+      micFg: listening ? '#121212' : '#D0D0D0',
+      closeChat: () => { stopVoice(); this.setState({ chatOpen: false }); },
+      onDraft: (e) => this.setState({ draft: e.target.value }),
+      onDraftKey: (e) => { if (e.key === 'Enter') sendMsg(); },
+      toggleMic: () => ((this.state || {}).listening ? stopVoice() : startVoice()),
+      noMenu: (e) => { if (e && e.preventDefault) e.preventDefault(); },
+      agentDown: () => {
+        this._long = false;
+        clearTimeout(this._lp);
+        this._lp = setTimeout(() => { this._long = true; startVoice(); }, 550);
+      },
+      agentUp: () => {
+        clearTimeout(this._lp);
+        if (this._long) stopVoice();
+      },
+      agentClick: () => {
+        if (this._long) { this._long = false; return; }
+        const st = this.state || {};
+        if (st.chatOpen) { stopVoice(); this.setState({ chatOpen: false }); } else this.setState({ chatOpen: true });
+      },
+    };
+  }
+}
+</script>
