@@ -1,0 +1,68 @@
+name: Android APK
+
+# Builds the LifeOS APK on GitHub's Linux machines (no Windows path-length limit, no local Android tools needed).
+# Run it by pushing to main, or from the Actions tab (Run workflow). The APK is attached to the run (Artifacts) and to a
+# GitHub Release named after the VERSION file, so it can be downloaded from the private repo and copied to the phone.
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['design/**', 'docs/**', '*.md']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Install packages
+        run: npm ci
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Generate the Android project (expo prebuild)
+        run: npx expo prebuild --platform android --no-install
+
+      - name: Build the APK (arm64, signed with the debug key: for installing on your own phone)
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a --no-daemon --console=plain
+
+      - name: Name the APK
+        run: |
+          V=$(tr -d '\r\n ' < VERSION)
+          cp android/app/build/outputs/apk/release/app-release.apk "LifeOS-v${V}.apk"
+          echo "VERSION=$V" >> "$GITHUB_ENV"
+          ls -la LifeOS-v${V}.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LifeOS-apk
+          path: LifeOS-v*.apk
+          retention-days: 30
+
+      - name: Attach to a GitHub Release
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "v${VERSION}" >/dev/null 2>&1 || gh release create "v${VERSION}" --title "LifeOS v${VERSION}" --notes "Android APK for LifeOS v${VERSION}. Debug-signed, for installing on your own phone. If an older LifeOS is installed, uninstall it first when Android refuses the update."
+          gh release upload "v${VERSION}" "LifeOS-v${VERSION}.apk" --clobber
