@@ -2,7 +2,11 @@ package expo.modules.termuxrun
 
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
+import android.os.Environment
 import android.os.PowerManager
+import android.provider.Settings
 import expo.modules.kotlin.exception.Exceptions
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
@@ -43,6 +47,18 @@ class TermuxRunModule : Module() {
     AsyncFunction("batteryUnrestricted") { pkg: String ->
       val pm = context.getSystemService(android.content.Context.POWER_SERVICE) as PowerManager
       pm.isIgnoringBatteryOptimizations(pkg)
+    }
+
+    // "All files access": lets the app keep the vault in a shared folder that Termux (Claude Code) can read too.
+    AsyncFunction("hasAllFilesAccess") {
+      Build.VERSION.SDK_INT < 30 || Environment.isExternalStorageManager()
+    }
+
+    AsyncFunction("requestAllFilesAccess") {
+      val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, Uri.parse("package:" + context.packageName))
+      intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+      context.startActivity(intent)
+      true
     }
 
     AsyncFunction("open") {

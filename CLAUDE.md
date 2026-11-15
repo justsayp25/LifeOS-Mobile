@@ -33,3 +33,11 @@ See `BUILD.md`. Expo SDK 58, React Native 0.88, Gradle 9.4, needs JDK 17 (a port
 
 ## Not tested on a real phone (as of v1.0)
 Everything: the WebView against the Termux server, the Termux start intent (needs `allow-external-apps=true` and the RUN_COMMAND permission; Android 16/17 unconfirmed), Health Connect permissions and data, microphone in the WebView, `backdrop-filter` glass on the phone's WebView, GitHub sync from the phone, Node and Claude Code inside Termux/proot.
+
+## Direction from v1.2 (Jess's decision, replaces the Termux-server design above)
+A native app that holds the vault itself and syncs with GitHub. The agent is Claude Code in Termux, started by the app. No separate server for the dashboard.
+- Vault: shared folder `/storage/emulated/0/LifeOS` (so Termux can read it), needs "All files access". Code in `src/vault/` (`sync.ts` isomorphic-git, tested by `node --experimental-strip-types tools/test-sync.mjs` against a local token-protected git server; `expoFs.ts`, `http.ts`, `vault.ts`).
+- Token: entered once in the app, kept in expo-secure-store, never in the repo.
+- Sync never overwrites or deletes: on a conflict the remote version keeps the note's name and the phone's is saved as `Name (conflict phone <date time>).ext`.
+- Steps: 1 vault + Sync (v1.2.0, done, not yet run on the phone) -> 2 app starts Claude Code in Termux -> 3 chat and voice talk to it -> 4 dashboard pages read the vault.
+- The old WebView/Termux-server app is `src/LegacyApp.tsx` (unused), `src/Setup.tsx` is reused for step 2.
