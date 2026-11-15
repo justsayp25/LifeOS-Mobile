@@ -77,9 +77,18 @@ ok(fs.existsSync(path.join(phone, 'Other.md')), 'unrelated phone note untouched'
 sh(pc, 'pull', '-q'); ok(fs.existsSync(path.join(pc, copy)) && fs.existsSync(path.join(pc, 'Other.md')), 'PC got the conflict copy and the other note');
 r = await syncVault(E()); ok(r.ok && r.saved === 0 && !r.conflicts.length, 'settled: nothing left to do');
 
-// a deletion on the phone is recorded but stays in history
-fs.rmSync(path.join(phone, 'New.md')); r = await syncVault(E());
-ok(r.ok && sh(bare, 'log', '--all', '--oneline', '--', 'New.md').trim().length > 0, 'deleted note stays in history');
+// a note deleted on the phone goes to the vault's Bin (1 Human/99 Bin), with its text
+const noteText = fs.readFileSync(path.join(phone, '1 Human', 'Note.md'), 'utf8');
+fs.rmSync(path.join(phone, '1 Human', 'Note.md')); r = await syncVault(E());
+const binned = path.join(phone, '1 Human', '99 Bin', 'Note.md');
+ok(r.ok && !fs.existsSync(path.join(phone, '1 Human', 'Note.md')) && fs.existsSync(binned) && fs.readFileSync(binned, 'utf8') === noteText, 'deleted note is in the Bin with its text: ' + r.message);
+sh(pc, 'pull', '-q'); ok(fs.existsSync(path.join(pc, '1 Human', '99 Bin', 'Note.md')) && !fs.existsSync(path.join(pc, '1 Human', 'Note.md')), 'PC sees it in the Bin too');
+// same name again -> (2)
+fs.writeFileSync(path.join(phone, 'Note.md'), 'second\n'); await syncVault(E()); fs.rmSync(path.join(phone, 'Note.md')); r = await syncVault(E());
+ok(r.ok && fs.existsSync(path.join(phone, '1 Human', '99 Bin', 'Note (2).md')) && fs.readFileSync(binned, 'utf8') === noteText, 'a second note with the same name becomes "Note (2).md", the first is untouched');
+// emptying the Bin is the user's own act and is recorded
+fs.rmSync(path.join(phone, '1 Human', '99 Bin', 'Note (2).md')); r = await syncVault(E());
+ok(r.ok && !fs.existsSync(path.join(phone, '1 Human', '99 Bin', 'Note (2).md')) && fs.readdirSync(path.join(phone, '1 Human', '99 Bin')).length === 1, 'emptying the Bin is recorded and does not create a Bin of the Bin');
 
 server.close(); fs.rmSync(root, { recursive: true, force: true });
 console.log(fails ? fails + ' FAILED' : 'ALL PASSED'); process.exit(fails ? 1 : 0);

@@ -23,14 +23,35 @@ export async function isCloned(e: Pick<Env, 'fs' | 'dir'>): Promise<boolean> {
   try { await git.resolveRef({ fs: e.fs, dir: e.dir, ref: 'HEAD' }); return true; } catch { return false; }
 }
 
+export const BIN_DIR = '1 Human/99 Bin';
+
+/** A note deleted on the phone goes to the vault's Bin (flat, "(2)" for name clashes) instead of vanishing. Returns false if it could not be saved there. */
+async function moveToBin(e: Env, file: string): Promise<boolean> {
+  try {
+    const head = await git.resolveRef({ fs: e.fs, dir: e.dir, ref: 'HEAD' });
+    const { blob } = await git.readBlob({ fs: e.fs, dir: e.dir, oid: head, filepath: file });
+    const name = file.slice(file.lastIndexOf('/') + 1);
+    const taken = async (n: string) => { try { await e.fs.promises.stat(e.dir + '/' + BIN_DIR + '/' + n); return true; } catch { return false; } };
+    let dest = name, k = 2;
+    while (await taken(dest)) dest = name.replace(/(\.[^.]*)?$/, (m: string) => ' (' + k++ + ')' + m);
+    await mkdirs(e, BIN_DIR);
+    await e.fs.promises.writeFile(e.dir + '/' + BIN_DIR + '/' + dest, blob);
+    await git.add({ fs: e.fs, dir: e.dir, filepath: BIN_DIR + '/' + dest });
+    return true;
+  } catch { return false; }
+}
+
 /** Save local changes as a commit. Returns how many files were included. */
 async function commitLocal(e: Env): Promise<number> {
   const rows = await git.statusMatrix({ fs: e.fs, dir: e.dir });
   let n = 0;
   for (const [file, head, workdir, stage] of rows) {
     if (head === 1 && workdir === 1 && stage === 1) continue; // unchanged
-    if (workdir === 0) await git.remove({ fs: e.fs, dir: e.dir, filepath: file }); // deleted on the phone: recorded, still in history
-    else await git.add({ fs: e.fs, dir: e.dir, filepath: file });
+    if (workdir === 0) {
+      // deleted on the phone: keep a copy in the Bin (not for the Bin itself or Obsidian's own files)
+      if (head === 1 && !file.startsWith(BIN_DIR + '/') && !file.startsWith('.obsidian/')) await moveToBin(e, file);
+      await git.remove({ fs: e.fs, dir: e.dir, filepath: file });
+    } else await git.add({ fs: e.fs, dir: e.dir, filepath: file });
     n++;
   }
   if (n) await git.commit({ fs: e.fs, dir: e.dir, message: 'LifeOS sync from ' + e.device + ' ' + stamp(), author: author(e.device) });
@@ -83,9 +104,12 @@ export async function syncVault(e: Env): Promise<Result> {
   }
 }
 
+async function mkdirs(e: Env, rel: string) {
+  let p = e.dir;
+  for (const d of rel.split('/').filter(Boolean)) { p += '/' + d; try { await e.fs.promises.mkdir(p); } catch { /* exists */ } }
+}
 async function writeText(e: Env, rel: string, text: string) {
   const parts = rel.split('/'); parts.pop();
-  let p = e.dir;
-  for (const d of parts) { p += '/' + d; try { await e.fs.promises.mkdir(p); } catch { /* exists */ } }
+  await mkdirs(e, parts.join('/'));
   await e.fs.promises.writeFile(e.dir + '/' + rel, text, 'utf8');
 }
