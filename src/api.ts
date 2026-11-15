@@ -37,7 +37,7 @@ export async function syncVault(): Promise<string> {
   return s;
 }
 
-export async function postHealth(day: { date: string; steps?: number; sleepMin?: number; restingHr?: number }): Promise<void> {
+export async function postHealth(day: { date: string; steps?: number; sleepMin?: number; restingHr?: number; activeMin?: number; burnedCal?: number }): Promise<void> {
   await call('POST', '/api/health/phone', day);
 }
 

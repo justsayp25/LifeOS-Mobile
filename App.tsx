@@ -80,6 +80,22 @@ function Root() {
     return () => clearInterval(t);
   }, [phase, startAuto]);
 
+  // ---- Samsung Health: update by itself when the app opens, when you come back to it, and every 5 minutes while it is open ----
+  const healthBusy = useRef(false);
+  const healthAt = useRef(0);
+  const autoHealth = useCallback(async () => {
+    if (healthBusy.current || Date.now() - healthAt.current < 60000) return;
+    healthBusy.current = true; healthAt.current = Date.now();
+    try { await syncHealth(true); } catch { /* the menu item shows the reason when you tap it */ } finally { healthBusy.current = false; }
+  }, []);
+  useEffect(() => {
+    if (phase !== 'up') return;
+    autoHealth();
+    const t = setInterval(autoHealth, 5 * 60 * 1000);
+    const sub = AppState.addEventListener('change', (st) => { if (st === 'active') autoHealth(); });
+    return () => { clearInterval(t); sub.remove(); };
+  }, [phase, autoHealth]);
+
   // ---- microphone and camera for the pages (voice, photos) ----
   useEffect(() => {
     if (phase !== 'up' || Platform.OS !== 'android') return;

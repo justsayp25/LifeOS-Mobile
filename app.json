@@ -2,14 +2,14 @@
   "expo": {
     "name": "LifeOS",
     "slug": "lifeos",
-    "version": "1.4.1",
+    "version": "1.5.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#121212",
     "android": {
       "package": "com.justsayp25.lifeos",
-      "versionCode": 9,
+      "versionCode": 10,
       "adaptiveIcon": {
         "backgroundColor": "#000000",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -21,7 +21,10 @@
         "android.permission.MODIFY_AUDIO_SETTINGS",
         "android.permission.health.READ_STEPS",
         "android.permission.health.READ_SLEEP",
-        "android.permission.health.READ_RESTING_HEART_RATE"
+        "android.permission.health.READ_RESTING_HEART_RATE",
+        "android.permission.health.READ_EXERCISE",
+        "android.permission.health.READ_TOTAL_CALORIES_BURNED",
+        "android.permission.health.READ_ACTIVE_CALORIES_BURNED"
       ],
       "predictiveBackGestureEnabled": false
     },
