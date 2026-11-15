@@ -2,14 +2,14 @@
   "expo": {
     "name": "LifeOS",
     "slug": "lifeos",
-    "version": "1.4.0",
+    "version": "1.4.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#121212",
     "android": {
       "package": "com.justsayp25.lifeos",
-      "versionCode": 8,
+      "versionCode": 9,
       "adaptiveIcon": {
         "backgroundColor": "#000000",
         "foregroundImage": "./assets/android-icon-foreground.png",

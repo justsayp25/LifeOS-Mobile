@@ -41,7 +41,16 @@ function Root() {
     try {
       if (await ping()) { setPhase('up'); return; }
       if (!(await TermuxRun.isInstalled())) { setNote('Termux is not installed on this phone.'); setPhase('down'); return; }
-      if (!(await TermuxRun.hasPermission())) { setNote('LifeOS is not allowed to run commands in Termux yet. Open Setup.'); setPhase('down'); return; }
+      if (!(await TermuxRun.hasPermission())) {
+        // ask Android for it right here (a system pop-up); no trip to Setup needed
+        let granted = false;
+        try { granted = (await PermissionsAndroid.request('com.termux.permission.RUN_COMMAND' as any)) === 'granted'; } catch { /* falls through */ }
+        if (!granted || !(await TermuxRun.hasPermission())) {
+          setNote('Android needs your OK once: in the page that just opened, tap Permissions, then "Run commands in Termux environment", then Allow. Come back and tap Retry.');
+          Linking.openSettings().catch(() => {});
+          setPhase('down'); return;
+        }
+      }
       await TermuxRun.run(TERMUX.bash, [TERMUX.script], TERMUX.home, true);
       for (let i = 0; i < START_WAIT_S; i++) {
         await new Promise((r) => setTimeout(r, 1000));
