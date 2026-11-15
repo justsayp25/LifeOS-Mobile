@@ -10,31 +10,31 @@ function png(w, h, rgba) {
   const ihdr = Buffer.alloc(13); ihdr.writeUInt32BE(w, 0); ihdr.writeUInt32BE(h, 4); ihdr[8] = 8; ihdr[9] = 6;
   return Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), chunk('IHDR', ihdr), chunk('IDAT', zlib.deflateSync(raw, { level: 9 })), chunk('IEND', Buffer.alloc(0))]);
 }
-// ring + plus, anti-aliased with 4x4 supersampling
-function draw(size, { r, stroke, half, fg, bg }) {
-  const buf = Buffer.alloc(size * size * 4), c = size / 2, sw = stroke / 2, SS = 4;
-  const segDist = (px, py, ax, ay, bx, by) => { const dx = bx - ax, dy = by - ay, t = Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy))); return Math.hypot(px - (ax + t * dx), py - (ay + t * dy)); };
+// R.E.N.E.E. mark: black disc, grey ring, white centre dot (the circle in the bottom nav), 4x4 supersampling.
+// layers: disc (colour), ring (colour), dot (colour); each layer composited over the last. bg = flat square colour or null.
+function draw(size, { R, ring, dot, bg, disc, rc, dc }) {
+  const buf = Buffer.alloc(size * size * 4), c = size / 2, SS = 4;
   for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
-    let cov = 0;
+    let acc = [0, 0, 0, 0];
     for (let sy = 0; sy < SS; sy++) for (let sx = 0; sx < SS; sx++) {
-      const px = x + (sx + 0.5) / SS - c, py = y + (sy + 0.5) / SS - c;
-      const ring = Math.abs(Math.hypot(px, py) - r) <= sw;
-      const plus = segDist(px, py, -half, 0, half, 0) <= sw || segDist(px, py, 0, -half, 0, half) <= sw;
-      if (ring || plus) cov++;
+      const d = Math.hypot(x + (sx + 0.5) / SS - c, y + (sy + 0.5) / SS - c);
+      let px = bg ? [...bg, 1] : [0, 0, 0, 0];
+      if (disc && d <= R) px = [...disc, 1];
+      if (rc && d <= R && d >= R - ring) px = [...rc, 1];
+      if (dc && d <= dot) px = [...dc, 1];
+      for (let k = 0; k < 4; k++) acc[k] += px[k];
     }
-    const a = cov / (SS * SS), i = (y * size + x) * 4;
-    const bgA = bg ? 1 : 0;
-    const outA = a + bgA * (1 - a);
-    const ch = (f, b) => (outA === 0 ? 0 : Math.round((f * a + (b || 0) * bgA * (1 - a)) / outA));
-    buf[i] = ch(fg[0], bg && bg[0]); buf[i + 1] = ch(fg[1], bg && bg[1]); buf[i + 2] = ch(fg[2], bg && bg[2]); buf[i + 3] = Math.round(outA * 255);
+    const n = SS * SS, i = (y * size + x) * 4, a = acc[3] / n;
+    for (let k = 0; k < 3; k++) buf[i + k] = a ? Math.round(acc[k] / n / a) : 0;
+    buf[i + 3] = Math.round(a * 255);
   }
   return png(size, size, buf);
 }
 const out = path.join(__dirname, '..', 'assets'); fs.mkdirSync(out, { recursive: true });
-const FG = [237, 237, 237], BG = [18, 18, 18];
-fs.writeFileSync(path.join(out, 'icon.png'), draw(1024, { r: 300, stroke: 44, half: 212, fg: FG, bg: BG }));
-// Android adaptive icon: the system adds the #121212 background, so keep the mark inside the centre 66%
-fs.writeFileSync(path.join(out, 'android-icon-foreground.png'), draw(1024, { r: 230, stroke: 34, half: 163, fg: FG, bg: null }));
-fs.writeFileSync(path.join(out, 'android-icon-monochrome.png'), draw(1024, { r: 230, stroke: 34, half: 163, fg: [255, 255, 255], bg: null }));
-fs.writeFileSync(path.join(out, 'splash-icon.png'), draw(512, { r: 150, stroke: 22, half: 106, fg: FG, bg: null }));
+const BG = [30, 30, 30], DISC = [0, 0, 0], RING = [62, 62, 62], DOT = [245, 245, 245];
+fs.writeFileSync(path.join(out, 'icon.png'), draw(1024, { R: 440, ring: 24, dot: 114, bg: BG, disc: DISC, rc: RING, dc: DOT }));
+// Android adaptive icon: the system adds the background colour and crops to a circle/squircle; keep the mark inside the centre 66%
+fs.writeFileSync(path.join(out, 'android-icon-foreground.png'), draw(1024, { R: 330, ring: 20, dot: 86, bg: null, disc: DISC, rc: RING, dc: DOT }));
+fs.writeFileSync(path.join(out, 'android-icon-monochrome.png'), draw(1024, { R: 330, ring: 24, dot: 86, bg: null, disc: null, rc: [255, 255, 255], dc: [255, 255, 255] }));
+fs.writeFileSync(path.join(out, 'splash-icon.png'), draw(512, { R: 200, ring: 12, dot: 52, bg: null, disc: DISC, rc: RING, dc: DOT }));
 console.log('icons written to', out);
