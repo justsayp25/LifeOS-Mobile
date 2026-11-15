@@ -40,3 +40,11 @@ export async function syncVault(): Promise<string> {
 export async function postHealth(day: { date: string; steps?: number; sleepMin?: number; restingHr?: number }): Promise<void> {
   await call('POST', '/api/health/phone', day);
 }
+
+/** Auto-sync (the server saves 30 s after your last change and checks GitHub every minute). */
+export async function getAutosync(): Promise<boolean | null> {
+  try { const j = await call('GET', '/api/autosync', undefined, 4000); return j && j.available !== false ? !!j.on : null; } catch { return null; }
+}
+export async function setAutosync(on: boolean): Promise<boolean | null> {
+  try { const j = await call('POST', '/api/autosync', { on }, 4000); return j ? !!j.on : null; } catch { return null; }
+}

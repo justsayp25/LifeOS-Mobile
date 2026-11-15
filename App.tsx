@@ -5,7 +5,7 @@ import { ActivityIndicator, AppState, BackHandler, Linking, Modal, PermissionsAn
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WebView as RNWebView, type WebViewNavigation } from 'react-native-webview';
 import TermuxRun from './modules/termux-run';
-import { ping, syncVault } from './src/api';
+import { getAutosync, ping, setAutosync, syncVault } from './src/api';
 import { BASE, C, START_COMMAND, START_URL, START_WAIT_S, TERMUX } from './src/config';
 import Setup from './src/Setup';
 import { syncHealth } from './src/health';
@@ -30,6 +30,7 @@ function Root() {
   const [menu, setMenu] = useState(false);
   const [busy, setBusy] = useState('');
   const [note, setNote] = useState('');
+  const [auto, setAuto] = useState<boolean | null>(null);
 
   // ---- start the server by itself (Termux RUN_COMMAND), then show the dashboard ----
   const starting = useRef(false);
@@ -123,7 +124,7 @@ function Root() {
             onError={() => startAuto()}
                         injectedJavaScriptBeforeContentLoaded="window.__LIFEOS_APP = 'android'; true;"
           />
-          <Pressable accessibilityLabel="Menu" onPress={() => { setNote(''); setMenu(true); }} style={[s.dots, { top: 6 }]} hitSlop={10}>
+          <Pressable accessibilityLabel="Menu" onPress={() => { setNote(''); setMenu(true); getAutosync().then(setAuto); }} style={[s.dots, { top: 6 }]} hitSlop={10}>
             <Text style={s.dotsText}>⋮</Text>
           </Pressable>
         </View>
@@ -161,6 +162,7 @@ function Root() {
         <Pressable style={s.scrim} onPress={() => setMenu(false)}>
           <Pressable style={[s.sheet, { marginTop: insets.top + 44 }]} onPress={() => {}}>
             <MenuItem label="Sync vault" busy={busy === 'sync'} onPress={() => run('sync', syncVault)} />
+            {auto !== null && <MenuItem label={'Auto-sync: ' + (auto ? 'on' : 'off')} onPress={() => setAutosync(!auto).then((v) => v !== null && setAuto(v))} />}
             <MenuItem label="Update health data" busy={busy === 'health'} onPress={() => run('health', syncHealth)} />
             <MenuItem label="Setup" onPress={() => { setMenu(false); setPhase('setup'); }} />
             <MenuItem label="Reload" onPress={() => { setMenu(false); web.current?.reload(); }} />
