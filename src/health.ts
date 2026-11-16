@@ -44,6 +44,14 @@ function asleepMinutes(sessions: any[], from: Date, to: Date): number {
   return Math.round(ms / 60000);
 }
 
+const SAMSUNG = 'com.sec.android.app.shealth';
+/** kcal in a window, and which apps supplied it. */
+async function kcalOf(type: 'TotalCaloriesBurned' | 'ActiveCaloriesBurned', key: 'ENERGY_TOTAL' | 'ACTIVE_CALORIES_TOTAL', from: Date, to: Date, only?: string[]) {
+  const a: any = await aggregateRecord({ recordType: type, timeRangeFilter: range(from, to), ...(only ? { dataOriginFilter: only } : {}) } as any);
+  const v = a && a[key] ? Number(a[key].inKilocalories) || 0 : 0;
+  return { kcal: v, origins: ((a && a.dataOrigins) || []) as string[] };
+}
+const short = (o: string[]) => (o.length ? o.map((x) => (x === SAMSUNG ? 'Samsung Health' : x)).join(', ') : 'none');
 const reason = (e: any) => String((e && e.message) || e || 'unknown').replace(/\s+/g, ' ').slice(0, 90);
 // Minutes of exercise sessions inside a window.
 function exerciseMinutes(sessions: any[], from: Date, to: Date): number {
@@ -59,19 +67,20 @@ function exerciseMinutes(sessions: any[], from: Date, to: Date): number {
 export async function syncHealth(silent = false): Promise<string> {
   const status = await getSdkStatus();
   if (status !== SdkAvailabilityStatus.SDK_AVAILABLE) {
-    if (silent) return '';
+    if (silent) return 'Health Connect is not available';
     return status === SdkAvailabilityStatus.SDK_UNAVAILABLE_PROVIDER_UPDATE_REQUIRED
       ? 'Health Connect needs an update (Settings > Apps > Health Connect, or Google Play).'
       : 'Health Connect is not available on this phone.';
   }
-  if (!(await initialize())) return silent ? '' : 'Health Connect could not start.';
+  if (!(await initialize())) return silent ? 'Health Connect could not start' : 'Health Connect could not start.';
   const { ok: can, missing } = await grantedTypes(!silent);
-  if (!can.size) return silent ? '' : 'LifeOS needs permission to read your health data. Allow it in Health Connect.';
+  if (!can.size) return silent ? 'not allowed yet: tap Update health data once' : 'LifeOS needs permission to read your health data. Allow it in Health Connect.';
 
   const now = new Date();
   const sent: string[] = [];
   const why: Record<string, string> = {}; // first reason a number could not be read, so nothing fails silently
   const had: Record<string, boolean> = {};
+  const diag: string[] = []; // where today's numbers came from
   let failed = '';
   for (let i = 0; i < 7; i++) {
     const day = at(now, 0, -i), next = at(now, 0, -i + 1), end = i === 0 ? now : next;
@@ -79,6 +88,7 @@ export async function syncHealth(silent = false): Promise<string> {
     if (can.has('Steps')) try {
       const steps: any = await aggregateRecord({ recordType: 'Steps', timeRangeFilter: range(day, end) });
       if (steps && steps.COUNT_TOTAL > 0) body.steps = Math.round(steps.COUNT_TOTAL);
+      if (i === 0) diag.push('steps: ' + (steps && steps.COUNT_TOTAL ? Math.round(steps.COUNT_TOTAL) : 0) + ' from ' + short(((steps && steps.dataOrigins) || []) as string[]));
     } catch (e) { why.steps = why.steps || reason(e); }
     if (can.has('SleepSession')) try {
       // the night that ends on this day: from 18:00 the evening before to 14:00 on the day
@@ -99,20 +109,23 @@ export async function syncHealth(silent = false): Promise<string> {
       const m = exerciseMinutes(res.records || [], day, end);
       if (m > 0) body.activeMin = Math.min(m, 1440);
     } catch (e) { why['exercise minutes'] = why['exercise minutes'] || reason(e); }
-    // calories burned: the day's total if Samsung shares it, otherwise the active part
-    for (const [type, key] of [['TotalCaloriesBurned', 'ENERGY_TOTAL'], ['ActiveCaloriesBurned', 'ACTIVE_CALORIES_TOTAL']] as const) {
-      if (body.burnedCal !== undefined || !can.has(type)) continue;
-      try {
-        const a: any = await aggregateRecord({ recordType: type, timeRangeFilter: range(day, end) });
-        const kcal = a && a[key] ? a[key].inKilocalories : 0;
-        if (kcal > 0) body.burnedCal = Math.round(kcal);
-      } catch (e) { why.calories = why.calories || reason(e); }
-    }
+    // Calories burned. If several apps report calories, only Samsung Health's count (the number you compare with in Samsung Health),
+    // otherwise the apps would be added together. The active part is the floor: the total can never be below it.
+    if (can.has('TotalCaloriesBurned') || can.has('ActiveCaloriesBurned')) try {
+      let tot = can.has('TotalCaloriesBurned') ? await kcalOf('TotalCaloriesBurned', 'ENERGY_TOTAL', day, end) : { kcal: 0, origins: [] as string[] };
+      let act = can.has('ActiveCaloriesBurned') ? await kcalOf('ActiveCaloriesBurned', 'ACTIVE_CALORIES_TOTAL', day, end) : { kcal: 0, origins: [] as string[] };
+      const rawTot = tot, rawAct = act;
+      if (tot.origins.length > 1 && tot.origins.includes(SAMSUNG)) tot = await kcalOf('TotalCaloriesBurned', 'ENERGY_TOTAL', day, end, [SAMSUNG]);
+      if (act.origins.length > 1 && act.origins.includes(SAMSUNG)) act = await kcalOf('ActiveCaloriesBurned', 'ACTIVE_CALORIES_TOTAL', day, end, [SAMSUNG]);
+      const best = Math.max(tot.kcal, act.kcal);
+      if (best > 0) body.burnedCal = Math.round(best);
+      if (i === 0) diag.push('calories: total ' + Math.round(rawTot.kcal) + ' kcal from ' + short(rawTot.origins) + (rawTot.origins.length > 1 ? ' (using Samsung Health only: ' + Math.round(tot.kcal) + ')' : '') + '; active ' + Math.round(rawAct.kcal) + ' kcal from ' + short(rawAct.origins) + '; sent ' + (body.burnedCal ?? 'nothing'));
+    } catch (e) { why.calories = why.calories || reason(e); }
     for (const k of ['steps', 'sleepMin', 'restingHr', 'activeMin', 'burnedCal'] as const) if (body[k] !== undefined) had[k] = true;
     if (!Object.keys(body).some((k) => k !== 'date')) continue;
     try { await postHealth(body); sent.push(body.date.slice(5)); } catch (e: any) { failed = e && e.message ? e.message : String(e); }
   }
-  if (silent) return failed ? 'failed: ' + failed : sent.length ? 'ok' : '';
+  if (silent) return failed ? 'failed: ' + failed : sent.length ? 'ok, ' + sent.length + ' day' + (sent.length === 1 ? '' : 's') : 'no data found';
   if (failed && !sent.length) return 'Could not save to LifeOS: ' + failed;
   if (!sent.length) return 'No health data found for the last 7 days. In Samsung Health, open Settings > Health Connect and turn sync on.';
   const names: Record<string, string> = { steps: 'steps', sleepMin: 'sleep', restingHr: 'resting heart rate', activeMin: 'exercise minutes', burnedCal: 'calories' };
@@ -121,5 +134,6 @@ export async function syncHealth(silent = false): Promise<string> {
   let out = 'Health data updated for ' + sent.length + ' day' + (sent.length === 1 ? '' : 's') + (failed ? ' (some failed: ' + failed + ')' : '') + '.\nGot: ' + got.join(', ') + '.';
   if (none.length) out += '\nNo data from Samsung for: ' + none.join(', ') + '.' + Object.entries(why).map(([k, v]) => '\n' + k + ': ' + v).join('');
   if (missing.length) out += '\nNot allowed yet: ' + missing.join(', ') + '.';
+  if (diag.length) out += '\nToday from Health Connect: ' + diag.join('; ') + '.';
   return out;
 }

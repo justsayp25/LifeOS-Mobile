@@ -91,12 +91,14 @@ function Root() {
   }, [phase, startAuto]);
 
   // ---- Samsung Health: update by itself when the app opens, when you come back to it, and every 5 minutes while it is open ----
+  const [autoHealthInfo, setAutoHealthInfo] = useState('');
   const healthBusy = useRef(false);
   const healthAt = useRef(0);
   const autoHealth = useCallback(async () => {
     if (healthBusy.current || Date.now() - healthAt.current < 60000) return;
     healthBusy.current = true; healthAt.current = Date.now();
-    try { await syncHealth(true); } catch { /* the menu item shows the reason when you tap it */ } finally { healthBusy.current = false; }
+    const t = new Date(), hhmm = String(t.getHours()).padStart(2, '0') + ':' + String(t.getMinutes()).padStart(2, '0');
+    try { setAutoHealthInfo(hhmm + ' ' + ((await syncHealth(true)) || 'nothing to do')); } catch (e: any) { setAutoHealthInfo(hhmm + ' error: ' + String((e && e.message) || e).slice(0, 80)); } finally { healthBusy.current = false; }
   }, []);
   useEffect(() => {
     if (phase !== 'up') return;
@@ -229,6 +231,7 @@ function Root() {
             {auto !== null && <MenuItem label={'Auto-sync: ' + (auto ? 'on' : 'off')} onPress={() => setAutosync(!auto).then((v) => v !== null && setAuto(v))} />}
             <MenuItem label="Update health data" busy={busy === 'health'} onPress={() => run('health', syncHealth)} />
             <MenuItem label="Setup" onPress={() => { setMenu(false); setPhase('setup'); }} />
+            {!!autoHealthInfo && <Text style={s.result}>{'Last automatic health update: ' + autoHealthInfo}</Text>}
             <MenuItem label="Reload" onPress={() => { setMenu(false); web.current?.reload(); }} />
             {!!note && <Text style={s.result}>{note}</Text>}
             <MenuItem label="Close" onPress={() => setMenu(false)} muted />
