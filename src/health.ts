@@ -86,8 +86,17 @@ export async function syncHealth(silent = false): Promise<string> {
     const day = at(now, 0, -i), next = at(now, 0, -i + 1), end = i === 0 ? now : next;
     const body: { date: string; steps?: number; sleepMin?: number; restingHr?: number; activeMin?: number; burnedCal?: number } = { date: dayKey(day) };
     if (can.has('Steps')) try {
-      const steps: any = await aggregateRecord({ recordType: 'Steps', timeRangeFilter: range(day, end) });
+      // Ask for the WHOLE day, not midnight-to-now: Samsung writes a day-long steps entry (12:00 am - 11:59 pm), and Health Connect cuts such an
+      // entry down by time when only part of it is asked for (at 9 am: 12 steps x 9/24 = 4). Nothing exists after "now", so the whole day is safe.
+      const steps: any = await aggregateRecord({ recordType: 'Steps', timeRangeFilter: range(day, next) });
       if (steps && steps.COUNT_TOTAL > 0) body.steps = Math.round(steps.COUNT_TOTAL);
+      if (i === 0) { // today's raw entries, so a wrong number can be checked against Health Connect's own Steps screen
+        try {
+          const rs: any = await readRecords('Steps', { timeRangeFilter: range(day, next) });
+          const hm = (t: string) => { const d = new Date(t); return d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0'); };
+          diag.push('step entries: ' + ((rs.records || []).slice(0, 4).map((r: any) => hm(r.startTime) + '-' + hm(r.endTime) + ' ' + r.count).join(' | ') || 'none'));
+        } catch { /* only diagnostics */ }
+      }
       if (i === 0) diag.push('steps: ' + (steps && steps.COUNT_TOTAL ? Math.round(steps.COUNT_TOTAL) : 0) + ' from ' + short(((steps && steps.dataOrigins) || []) as string[]));
     } catch (e) { why.steps = why.steps || reason(e); }
     if (can.has('SleepSession')) try {
