@@ -44,7 +44,8 @@ class ReneeSpeechModule : Module() {
     }
 
     // Everything the recognizer does must happen on the main thread.
-    Function("start") { lang: String, silenceMs: Int ->
+    // lang "" = the phone's own language. offline = true asks for the on-device model (private); false lets the phone use the network (the system default).
+    Function("start") { lang: String, silenceMs: Int, offline: Boolean ->
       session += 1
       val my = session
       main.post {
@@ -65,10 +66,10 @@ class ReneeSpeechModule : Module() {
           })
           val i = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
           i.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-          i.putExtra(RecognizerIntent.EXTRA_LANGUAGE, lang)
+          if (lang.isNotEmpty()) i.putExtra(RecognizerIntent.EXTRA_LANGUAGE, lang)
           i.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
           i.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
-          i.putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
+          i.putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, offline)
           i.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, context.packageName)
           i.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, silenceMs.toLong())
           i.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, silenceMs.toLong())

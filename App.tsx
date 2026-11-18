@@ -147,7 +147,7 @@ function Root() {
       if (m && m.type === 'stt') {
         if (m.cmd === 'probe') sendToPage({ type: 'probe', ok: speechAvailable() });
         else if (m.cmd === 'start') {
-          try { speechStart(String(m.lang || 'en-US'), Number(m.silenceMs) || 900, sendToPage); }
+          try { speechStart(String(m.lang || ''), Number(m.silenceMs) || 900, m.offline !== false, sendToPage); }
           catch (err: any) { sendToPage({ type: 'error', text: String((err && err.message) || err), code: -1 }); }
         }
         else if (m.cmd === 'stop') speechStop();

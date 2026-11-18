@@ -10,11 +10,11 @@ let sub: { remove(): void } | null = null;
 export function speechAvailable(): boolean {
   try { return !!mod && !!mod.isAvailable(); } catch { return false; }
 }
-export function speechStart(lang: string, silenceMs: number, onEvent: (e: SpeechEvent) => void): void {
+export function speechStart(lang: string, silenceMs: number, offline: boolean, onEvent: (e: SpeechEvent) => void): void {
   if (!mod) throw new Error('Android listening is not in this build.');
   if (sub) { try { sub.remove(); } catch { /* gone */ } sub = null; }
   sub = mod.addListener('onSpeech', onEvent);
-  mod.start(lang, silenceMs);
+  mod.start(lang, silenceMs, offline);
 }
 export function speechStop(): void {
   try { if (mod) mod.stop(); } catch { /* nothing running */ }
