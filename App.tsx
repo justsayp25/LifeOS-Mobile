@@ -10,6 +10,7 @@ import { BASE, C, START_COMMAND, START_URL, START_WAIT_S, TERMUX } from './src/c
 import Setup from './src/Setup';
 import { syncHealth } from './src/health';
 import { speechAvailable, speechCancel, speechStart, speechStop } from './modules/termux-run/speech';
+import { ttsInit, ttsSpeak, ttsStop } from './modules/termux-run/tts';
 
 // react-native-webview 14 types do not accept `ref` on the function component under React 19; the component itself supports it.
 const WebView: any = RNWebView;
@@ -139,6 +140,7 @@ function Root() {
   // The page talks to the phone's own speech recognition through these messages (JSON strings); the answers go back as window.reneeNative.onEvent(...).
   const toPage = (js: string) => { try { web.current?.injectJavaScript(js + ';true;'); } catch { /* page gone */ } };
   const sendToPage = (o: any) => toPage('window.reneeNative&&window.reneeNative.onEvent(' + JSON.stringify(o) + ')');
+  const sendTts = (o: any) => toPage('window.reneeNativeTts&&window.reneeNativeTts.onEvent(' + JSON.stringify(o) + ')');
   const onWebMessage = (e: any) => {
     const d = e && e.nativeEvent ? e.nativeEvent.data : '';
     if (typeof d === 'string' && d.charAt(0) === '{') {
@@ -152,6 +154,10 @@ function Root() {
         }
         else if (m.cmd === 'stop') speechStop();
         else if (m.cmd === 'cancel') speechCancel();
+      } else if (m && m.type === 'tts') {
+        if (m.cmd === 'init') ttsInit(sendTts);
+        else if (m.cmd === 'speak') ttsSpeak(String(m.id || ''), String(m.text || ''), Number(m.rate) || 1.25);
+        else if (m.cmd === 'stop') ttsStop();
       } else if (m && m.type === 'pref') setStt(m.engine === 'android' ? 'android' : 'whisper');
       return;
     }
