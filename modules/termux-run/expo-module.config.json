@@ -5,8 +5,7 @@
   "android": {
     "modules": [
       "expo.modules.termuxrun.TermuxRunModule",
-      "expo.modules.termuxrun.ReneeSpeechModule",
-      "expo.modules.termuxrun.ReneeTtsModule"
+      "expo.modules.termuxrun.ReneeSpeechModule"
     ]
   }
 }

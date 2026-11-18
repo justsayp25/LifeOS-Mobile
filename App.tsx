@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import * as Clipboard from 'expo-clipboard';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, AppState, BackHandler, Linking, Modal, PanResponder, PermissionsAndroid, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, AppState, BackHandler, Linking, Modal, PermissionsAndroid, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WebView as RNWebView, type WebViewNavigation } from 'react-native-webview';
 import TermuxRun from './modules/termux-run';
@@ -10,7 +10,6 @@ import { BASE, C, START_COMMAND, START_URL, START_WAIT_S, TERMUX } from './src/c
 import Setup from './src/Setup';
 import { syncHealth } from './src/health';
 import { speechAvailable, speechCancel, speechStart, speechStop } from './modules/termux-run/speech';
-import { ttsInit, ttsSpeak, ttsStop } from './modules/termux-run/tts';
 
 // react-native-webview 14 types do not accept `ref` on the function component under React 19; the component itself supports it.
 const WebView: any = RNWebView;
@@ -43,8 +42,6 @@ function Root() {
   const [busy, setBusy] = useState('');
   const [note, setNote] = useState('');
   const [auto, setAuto] = useState<boolean | null>(null);
-  const [rate, setRate] = useState<number>(1.25); // voice speed (kept by the page in localStorage lifeos.ttsRate)
-  const [phoneTts, setPhoneTts] = useState<boolean>(false); // speak with the phone's own voice (lifeos.tts = 'phone')
   const [stt, setStt] = useState<'android' | 'whisper' | null>(null); // which listening R.E.N.E.E. uses (chosen in the menu, kept by the page)
 
   // ---- start the server by itself (Termux RUN_COMMAND), then show the dashboard ----
@@ -142,7 +139,6 @@ function Root() {
   // The page talks to the phone's own speech recognition through these messages (JSON strings); the answers go back as window.reneeNative.onEvent(...).
   const toPage = (js: string) => { try { web.current?.injectJavaScript(js + ';true;'); } catch { /* page gone */ } };
   const sendToPage = (o: any) => toPage('window.reneeNative&&window.reneeNative.onEvent(' + JSON.stringify(o) + ')');
-  const sendTts = (o: any) => toPage('window.reneeNativeTts&&window.reneeNativeTts.onEvent(' + JSON.stringify(o) + ')');
   const onWebMessage = (e: any) => {
     const d = e && e.nativeEvent ? e.nativeEvent.data : '';
     if (typeof d === 'string' && d.charAt(0) === '{') {
@@ -156,11 +152,7 @@ function Root() {
         }
         else if (m.cmd === 'stop') speechStop();
         else if (m.cmd === 'cancel') speechCancel();
-      } else if (m && m.type === 'tts') {
-        if (m.cmd === 'init') ttsInit(sendTts);
-        else if (m.cmd === 'speak') ttsSpeak(String(m.id || ''), String(m.text || ''), Number(m.rate) || 1.25);
-        else if (m.cmd === 'stop') ttsStop();
-      } else if (m && m.type === 'pref') { setStt(m.engine === 'android' ? 'android' : 'whisper'); setPhoneTts(m.tts === 'phone'); const r = parseFloat(m.rate); setRate(r >= 0.6 && r <= 2 ? r : (m.tts === 'phone' ? 1.25 : 1)); }
+      } else if (m && m.type === 'pref') setStt(m.engine === 'android' ? 'android' : 'whisper');
       return;
     }
     if (d !== 'back:handled' && d !== 'back:none') return;
@@ -217,7 +209,7 @@ function Root() {
             onError={() => startAuto()}
                         injectedJavaScriptBeforeContentLoaded="window.__LIFEOS_APP = 'android'; true;"
           />
-          <Pressable accessibilityLabel="Menu" onPress={() => { setNote(''); setMenu(true); getAutosync().then(setAuto); toPage("window.ReactNativeWebView.postMessage(JSON.stringify({type:'pref',engine:localStorage.getItem('lifeos.sttEngine')||'whisper',tts:localStorage.getItem('lifeos.tts')||'',rate:localStorage.getItem('lifeos.ttsRate')||''}))"); }} style={[s.dots, { top: 6 }]} hitSlop={10}>
+          <Pressable accessibilityLabel="Menu" onPress={() => { setNote(''); setMenu(true); getAutosync().then(setAuto); toPage("window.ReactNativeWebView.postMessage(JSON.stringify({type:'pref',engine:localStorage.getItem('lifeos.sttEngine')||'whisper'}))"); }} style={[s.dots, { top: 6 }]} hitSlop={10}>
             <Text style={s.dotsText}>⋮</Text>
           </Pressable>
         </View>
@@ -266,18 +258,6 @@ function Root() {
                 }}
               />
             )}
-            {stt !== null && (
-              <MenuItem
-                label={'Speak with: ' + (phoneTts ? 'Phone voice' : 'Kokoro')}
-                onPress={() => {
-                  const next = !phoneTts;
-                  toPage(next ? "try{localStorage.setItem('lifeos.tts','phone')}catch(e){}" : "try{localStorage.removeItem('lifeos.tts')}catch(e){}");
-                  setPhoneTts(next);
-                  if (next && !(parseFloat(String(rate)) > 0)) setRate(1.25);
-                }}
-              />
-            )}
-            {stt !== null && <SpeedSlider value={rate} onChange={(v) => { setRate(v); toPage("try{localStorage.setItem('lifeos.ttsRate','" + v + "')}catch(e){}"); }} />}
             <MenuItem label="Update health data" busy={busy === 'health'} onPress={() => run('health', syncHealth)} />
             <MenuItem label="Setup" onPress={() => { setMenu(false); setPhase('setup'); }} />
             {!!autoHealthInfo && <Text style={s.result}>{'Last automatic health update: ' + autoHealthInfo}</Text>}
@@ -287,28 +267,6 @@ function Root() {
           </Pressable>
         </Pressable>
       </Modal>
-    </View>
-  );
-}
-
-// A small draggable slider for the voice speed (0.6x to 2x, steps of 0.05).
-function SpeedSlider({ value, onChange }: { value: number; onChange: (v: number) => void }) {
-  const W = 190, MIN = 0.6, MAX = 2;
-  const pick = (x: number) => { const f = Math.max(0, Math.min(1, x / W)); onChange(Math.round((MIN + f * (MAX - MIN)) * 20) / 20); };
-  const pan = useRef(PanResponder.create({
-    onStartShouldSetPanResponder: () => true, onMoveShouldSetPanResponder: () => true, onPanResponderTerminationRequest: () => false,
-    onPanResponderGrant: (e) => pick(e.nativeEvent.locationX),
-    onPanResponderMove: (e) => pick(e.nativeEvent.locationX),
-  })).current;
-  const x = ((Math.max(MIN, Math.min(MAX, value)) - MIN) / (MAX - MIN)) * W;
-  return (
-    <View style={{ paddingHorizontal: 16, paddingVertical: 12 }}>
-      <Text style={{ color: C.text, fontSize: 15, marginBottom: 10 }}>{'Voice speed: ' + value.toFixed(2).replace(/0$/, '') + 'x'}</Text>
-      <View {...pan.panHandlers} style={{ width: W, height: 32, justifyContent: 'center' }} accessibilityLabel="Voice speed">
-        <View pointerEvents="none" style={{ height: 4, borderRadius: 2, backgroundColor: '#333' }} />
-        <View pointerEvents="none" style={{ position: 'absolute', left: 0, width: x, height: 4, borderRadius: 2, backgroundColor: C.text }} />
-        <View pointerEvents="none" style={{ position: 'absolute', left: x - 10, width: 20, height: 20, borderRadius: 10, backgroundColor: C.text }} />
-      </View>
     </View>
   );
 }
