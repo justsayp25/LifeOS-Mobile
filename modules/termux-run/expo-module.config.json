@@ -1,6 +1,11 @@
 {
-  "platforms": ["android"],
+  "platforms": [
+    "android"
+  ],
   "android": {
-    "modules": ["expo.modules.termuxrun.TermuxRunModule"]
+    "modules": [
+      "expo.modules.termuxrun.TermuxRunModule",
+      "expo.modules.termuxrun.ReneeSpeechModule"
+    ]
   }
 }

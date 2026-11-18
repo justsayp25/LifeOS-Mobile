@@ -9,6 +9,7 @@ import { getAutosync, ping, setAutosync, syncVault } from './src/api';
 import { BASE, C, START_COMMAND, START_URL, START_WAIT_S, TERMUX } from './src/config';
 import Setup from './src/Setup';
 import { syncHealth } from './src/health';
+import { speechAvailable, speechCancel, speechStart, speechStop } from './modules/termux-run/speech';
 
 // react-native-webview 14 types do not accept `ref` on the function component under React 19; the component itself supports it.
 const WebView: any = RNWebView;
@@ -41,6 +42,7 @@ function Root() {
   const [busy, setBusy] = useState('');
   const [note, setNote] = useState('');
   const [auto, setAuto] = useState<boolean | null>(null);
+  const [stt, setStt] = useState<'android' | 'whisper' | null>(null); // which listening R.E.N.E.E. uses (chosen in the menu, kept by the page)
 
   // ---- start the server by itself (Termux RUN_COMMAND), then show the dashboard ----
   const starting = useRef(false);
@@ -134,8 +136,25 @@ function Root() {
     });
     return () => sub.remove();
   }, [menu, phase, backFallback]);
+  // The page talks to the phone's own speech recognition through these messages (JSON strings); the answers go back as window.reneeNative.onEvent(...).
+  const toPage = (js: string) => { try { web.current?.injectJavaScript(js + ';true;'); } catch { /* page gone */ } };
+  const sendToPage = (o: any) => toPage('window.reneeNative&&window.reneeNative.onEvent(' + JSON.stringify(o) + ')');
   const onWebMessage = (e: any) => {
     const d = e && e.nativeEvent ? e.nativeEvent.data : '';
+    if (typeof d === 'string' && d.charAt(0) === '{') {
+      let m: any = null;
+      try { m = JSON.parse(d); } catch { return; }
+      if (m && m.type === 'stt') {
+        if (m.cmd === 'probe') sendToPage({ type: 'probe', ok: speechAvailable() });
+        else if (m.cmd === 'start') {
+          try { speechStart(String(m.lang || 'en-US'), Number(m.silenceMs) || 900, sendToPage); }
+          catch (err: any) { sendToPage({ type: 'error', text: String((err && err.message) || err), code: -1 }); }
+        }
+        else if (m.cmd === 'stop') speechStop();
+        else if (m.cmd === 'cancel') speechCancel();
+      } else if (m && m.type === 'pref') setStt(m.engine === 'android' ? 'android' : 'whisper');
+      return;
+    }
     if (d !== 'back:handled' && d !== 'back:none') return;
     clearTimeout(backTimer.current);
     if (d === 'back:none') backFallback();
@@ -190,7 +209,7 @@ function Root() {
             onError={() => startAuto()}
                         injectedJavaScriptBeforeContentLoaded="window.__LIFEOS_APP = 'android'; true;"
           />
-          <Pressable accessibilityLabel="Menu" onPress={() => { setNote(''); setMenu(true); getAutosync().then(setAuto); }} style={[s.dots, { top: 6 }]} hitSlop={10}>
+          <Pressable accessibilityLabel="Menu" onPress={() => { setNote(''); setMenu(true); getAutosync().then(setAuto); toPage("window.ReactNativeWebView.postMessage(JSON.stringify({type:'pref',engine:localStorage.getItem('lifeos.sttEngine')||'whisper'}))"); }} style={[s.dots, { top: 6 }]} hitSlop={10}>
             <Text style={s.dotsText}>⋮</Text>
           </Pressable>
         </View>
@@ -229,6 +248,16 @@ function Root() {
           <Pressable style={[s.sheet, { marginTop: insets.top + 44 }]} onPress={() => {}}>
             <MenuItem label="Sync vault" busy={busy === 'sync'} onPress={() => run('sync', syncVault)} />
             {auto !== null && <MenuItem label={'Auto-sync: ' + (auto ? 'on' : 'off')} onPress={() => setAutosync(!auto).then((v) => v !== null && setAuto(v))} />}
+            {stt !== null && speechAvailable() && (
+              <MenuItem
+                label={'Listening: ' + (stt === 'android' ? 'Android' : 'Whisper')}
+                onPress={() => {
+                  const next = stt === 'android' ? 'whisper' : 'android';
+                  toPage("try{localStorage.setItem('lifeos.sttEngine','" + next + "')}catch(e){}");
+                  setStt(next);
+                }}
+              />
+            )}
             <MenuItem label="Update health data" busy={busy === 'health'} onPress={() => run('health', syncHealth)} />
             <MenuItem label="Setup" onPress={() => { setMenu(false); setPhase('setup'); }} />
             {!!autoHealthInfo && <Text style={s.result}>{'Last automatic health update: ' + autoHealthInfo}</Text>}
