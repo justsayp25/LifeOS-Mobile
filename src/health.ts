@@ -10,7 +10,7 @@ import {
   SdkAvailabilityStatus,
   SleepStageType,
 } from 'react-native-health-connect';
-import { postHealth } from './api';
+import { gymImport, postHealth } from './api';
 
 const RECORDS = ['Steps', 'SleepSession', 'RestingHeartRate', 'ExerciseSession', 'TotalCaloriesBurned', 'ActiveCaloriesBurned'] as const;
 const pad = (n: number) => String(n).padStart(2, '0');
@@ -64,7 +64,7 @@ function exerciseMinutes(sessions: any[], from: Date, to: Date): number {
  * Reads the last 7 days from Health Connect and posts them to the LifeOS server on this phone. Returns a short plain-words result.
  * silent = run in the background (when the app opens): it never opens a permission page, and it uses only what was already allowed.
  */
-export async function syncHealth(silent = false): Promise<string> {
+async function syncHealthConnect(silent = false): Promise<string> {
   const status = await getSdkStatus();
   if (status !== SdkAvailabilityStatus.SDK_AVAILABLE) {
     if (silent) return 'Health Connect is not available';
@@ -145,4 +145,30 @@ export async function syncHealth(silent = false): Promise<string> {
   if (missing.length) out += '\nNot allowed yet: ' + missing.join(', ') + '.';
   if (diag.length) out += '\nToday from Health Connect: ' + diag.join('; ') + '.';
   return out;
+}
+
+/** GymMane: asks the server to read GymMane's newest backup now. Returns one plain line (the server's own count check). */
+async function syncGymMane(silent: boolean): Promise<string> {
+  try {
+    const r = await gymImport();
+    if (r.off) return silent ? 'GymMane import is off' : 'GymMane import is switched off on the server (GYMMANE_IMPORT=0).';
+    if (!r.ok) return silent ? 'GymMane: ' + (r.error || 'failed') : 'GymMane: ' + (r.error || 'the import did not finish.') + (r.summary ? '\n' + r.summary : '');
+    const more = r.added || r.cardio ? ' Added ' + (r.added || 0) + ' lift' + (r.added === 1 ? '' : 's') + (r.cardio ? ' and ' + r.cardio + ' run' + (r.cardio === 1 ? '' : 's') : '') + '.' : '';
+    return silent ? 'GymMane ok, ' + (r.sessions ?? '?') + ' workouts' + (more ? ',' + more.toLowerCase() : '') : (r.summary || 'GymMane is up to date.') + more;
+  } catch (e: any) {
+    const m = e && e.message ? String(e.message) : String(e);
+    return silent ? 'GymMane: ' + m : 'GymMane did not update: ' + m + (/404|said 4/.test(m) ? ' (the LifeOS server on the phone needs version 1.9.50 or newer)' : '');
+  }
+}
+
+/**
+ * Update health data = Samsung Health (through Health Connect) AND GymMane, together: both are asked at once, and one result tells what each did.
+ * Neither waits for or depends on the other (GymMane still updates when Health Connect is not allowed yet).
+ */
+export async function syncHealth(silent = false): Promise<string> {
+  const [hc, gm] = await Promise.all([
+    syncHealthConnect(silent).catch((e: any) => (silent ? 'failed: ' : 'Samsung Health did not update: ') + (e && e.message ? e.message : String(e))),
+    syncGymMane(silent),
+  ]);
+  return silent ? hc + ' · ' + gm : hc + '\n\n' + gm;
 }

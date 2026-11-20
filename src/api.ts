@@ -41,6 +41,13 @@ export async function postHealth(day: { date: string; steps?: number; sleepMin?:
   await call('POST', '/api/health/phone', day);
 }
 
+export type GymImportResult = { ok: boolean; unchanged?: boolean; added?: number; workouts?: number; cardio?: number; sessions?: number; summary?: string; error?: string; off?: boolean };
+
+/** GymMane -> LifeOS: the server reads GymMane's newest Auto backup now (it also does this by itself every minute). */
+export async function gymImport(): Promise<GymImportResult> {
+  return call('POST', '/api/gymimport/run', {}, 30000);
+}
+
 /** Auto-sync (the server saves 30 s after your last change and checks GitHub every minute). */
 export async function getAutosync(): Promise<boolean | null> {
   try { const j = await call('GET', '/api/autosync', undefined, 4000); return j && j.available !== false ? !!j.on : null; } catch { return null; }
