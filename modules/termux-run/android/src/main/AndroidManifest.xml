@@ -8,5 +8,6 @@
     <package android:name="com.google.android.gm" />
     <package android:name="com.google.android.apps.docs" />
     <package android:name="com.instructure.candroid" />
+    <package android:name="com.gymmane.app" />
   </queries>
 </manifest>
