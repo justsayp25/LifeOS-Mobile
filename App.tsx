@@ -154,6 +154,14 @@ function Root() {
         else if (m.cmd === 'stop') speechStop();
         else if (m.cmd === 'cancel') speechCancel();
       } else if (m && m.type === 'menu') openMenu();
+      else if (m && m.type === 'setup') setPhase('setup');
+      else if (m && m.type === 'health') {
+        (async () => {
+          let text = '';
+          try { text = (await syncHealth(false)) || 'nothing to do'; } catch (err: any) { text = 'error: ' + String((err && err.message) || err).slice(0, 120); }
+          toPage('window.lifeosApp&&window.lifeosApp.onHealth(' + JSON.stringify(text) + ')');
+        })();
+      }
       else if (m && m.type === 'pref') setStt(m.engine === 'android' ? 'android' : 'whisper');
       return;
     }
