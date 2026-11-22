@@ -1,6 +1,6 @@
 {
   "name": "lifeos-mobile",
-  "version": "1.7.4",
+  "version": "1.7.5",
   "main": "index.ts",
   "dependencies": {
     "buffer": "^6.0.3",

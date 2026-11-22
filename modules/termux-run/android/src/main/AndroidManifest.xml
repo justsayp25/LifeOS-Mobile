@@ -9,5 +9,6 @@
     <package android:name="com.google.android.apps.docs" />
     <package android:name="com.instructure.candroid" />
     <package android:name="com.gymmane.app" />
+    <package android:name="com.sec.android.app.shealth" />
   </queries>
 </manifest>
