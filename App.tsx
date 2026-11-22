@@ -139,6 +139,7 @@ function Root() {
   // The page talks to the phone's own speech recognition through these messages (JSON strings); the answers go back as window.reneeNative.onEvent(...).
   const toPage = (js: string) => { try { web.current?.injectJavaScript(js + ';true;'); } catch { /* page gone */ } };
   const sendToPage = (o: any) => toPage('window.reneeNative&&window.reneeNative.onEvent(' + JSON.stringify(o) + ')');
+  const openMenu = () => { setNote(''); setMenu(true); getAutosync().then(setAuto); toPage("window.ReactNativeWebView.postMessage(JSON.stringify({type:'pref',engine:localStorage.getItem('lifeos.sttEngine')||'whisper'}))"); };
   const onWebMessage = (e: any) => {
     const d = e && e.nativeEvent ? e.nativeEvent.data : '';
     if (typeof d === 'string' && d.charAt(0) === '{') {
@@ -152,7 +153,8 @@ function Root() {
         }
         else if (m.cmd === 'stop') speechStop();
         else if (m.cmd === 'cancel') speechCancel();
-      } else if (m && m.type === 'pref') setStt(m.engine === 'android' ? 'android' : 'whisper');
+      } else if (m && m.type === 'menu') openMenu();
+      else if (m && m.type === 'pref') setStt(m.engine === 'android' ? 'android' : 'whisper');
       return;
     }
     if (d !== 'back:handled' && d !== 'back:none') return;
@@ -209,9 +211,7 @@ function Root() {
             onError={() => startAuto()}
                         injectedJavaScriptBeforeContentLoaded="window.__LIFEOS_APP = 'android'; true;"
           />
-          <Pressable accessibilityLabel="Menu" onPress={() => { setNote(''); setMenu(true); getAutosync().then(setAuto); toPage("window.ReactNativeWebView.postMessage(JSON.stringify({type:'pref',engine:localStorage.getItem('lifeos.sttEngine')||'whisper'}))"); }} style={[s.dots, { top: 6 }]} hitSlop={10}>
-            <Text style={s.dotsText}>⋮</Text>
-          </Pressable>
+
         </View>
       ) : phase === 'setup' ? (
         <Setup onClose={() => startAuto()} />
@@ -258,6 +258,7 @@ function Root() {
                 }}
               />
             )}
+            <MenuItem label="Light / Dark" onPress={() => { setMenu(false); toPage("window.lifeosTheme&&window.lifeosTheme.toggle()"); }} />
             <MenuItem label="Update health data" busy={busy === 'health'} onPress={() => run('health', syncHealth)} />
             <MenuItem label="Setup" onPress={() => { setMenu(false); setPhase('setup'); }} />
             {!!autoHealthInfo && <Text style={s.result}>{'Last automatic health update: ' + autoHealthInfo}</Text>}
